@@ -90,7 +90,7 @@ component
      *
      * @return string
      */
-    public string function getBaseDir(string path = '')
+    public string function getBaseDir(string path = '', boolean create = false)
     {
         var baseDir = application.mvc.baseDirectory;
 
@@ -98,7 +98,13 @@ component
             baseDir = left(baseDir, len(baseDir) - 1);
         }
 
-        return '#baseDir#\#path#';
+        var targetDir = '#baseDir#\#path#';
+
+        if (create && !directoryExists(targetDir)) {
+            directoryCreate(targetDir);
+        }
+
+        return targetDir;
     }
 
     /**
@@ -106,7 +112,7 @@ component
      *
      * @return string
      */
-    public string function getDataDir(string path = '')
+    public string function getDataDir(string path = '', boolean create = false)
     {
         var dataDir = application.mvc.dataDirectory;
 
@@ -114,7 +120,13 @@ component
             dataDir = left(dataDir, len(dataDir) - 1);
         }
 
-        return '#dataDir#\#path#';
+        var targetDir = '#dataDir#\#path#';
+
+        if (create && !directoryExists(targetDir)) {
+            directoryCreate(targetDir);
+        }
+
+        return targetDir;
     }
 
     /**
