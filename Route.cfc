@@ -40,10 +40,11 @@ component
         }
 
         try {
-            route()
-                .findURI(url.url_payload)
-                .perform();
+            if (structKeyExists(url, 'url_payload')) {
+                route().findURI(url.url_payload).perform();
+            }
         } catch (any error) {
+            writeDump(error);
             return this;
         }
 
@@ -63,6 +64,18 @@ component
     }
 
     /**
+     * Adds a POST HTTP request to the pool.
+     *
+     * @return any
+     */
+    public any function post(required string uri, required string action)
+    {
+        var routeURI = new App.Framework.RouteURI('post', uri, action);
+        arrayAppend(request.routes, routeURI);
+        return routeURI;
+    }
+
+    /**
      * Finds the given URI in the request routes.
      *
      * @return any
@@ -72,34 +85,19 @@ component
         var routeURI = [];
 
         for (route in request.routes) {
-            if (lCase(stripSlashes(route.getURI())) == lCase(stripSlashes(uri))) {
+            if (
+                lCase(stripSlashes(route.getURI())) == lCase(stripSlashes(uri)) &&
+                lCase(route.getType()) == lCase(cgi.request_method)
+            ) {
                 routeURI = route;
                 break;
             }
         }
 
         if (isArray(routeURI)) {
-            throw(message = "Route directive for page '#uri#' does not exist.");
+            throw(message = "Route directive for page '#uri#' using method #cgi.request_method# does not exist.");
         }
 
         return routeURI;
-    }
-
-    /**
-     * Strips leading and trailing slashes.
-     *
-     * @return any
-     */
-    public string function stripSlashes(required string str)
-    {
-        if (left(str, 1) == '/' || left(str, 1) == '\') {
-            str = right(str, len(str) - 1);
-        }
-
-        if (right(str, 1) == '/' || right(str, 1) == '\') {
-            str = left(str, len(str) - 1);
-        }
-
-        return str;
     }
 }

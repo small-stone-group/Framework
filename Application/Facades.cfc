@@ -68,7 +68,7 @@ component
     public string function getUrl(string uri = '')
     {
         var https = (cgi.https == 'off') ? 'http' : 'https';
-        return '#https#://#cgi.server_name#/#uri#';
+        return '#https#://#cgi.server_name#/#stripSlashes(uri)#';
     }
 
     /**
@@ -183,5 +183,45 @@ component
         } else {
             return defaultValue;
         }
+    }
+
+    /**
+     * Checks whether the given string ends with the given substring(s).
+     *
+     * @return boolean
+     */
+    public boolean function endsWith(required string str, required any substr)
+    {
+        if (isArray(substr)) {
+            for (s in substr) {
+                if (right(str, len(s)) == s) {
+                    return true;
+                }
+            }
+        } else {
+            if (right(str, len(substr)) == substr) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Strips leading and trailing slashes.
+     *
+     * @return any
+     */
+    public string function stripSlashes(required string str)
+    {
+        if (left(str, 1) == '/' || left(str, 1) == '\') {
+            str = right(str, len(str) - 1);
+        }
+
+        if (right(str, 1) == '/' || right(str, 1) == '\') {
+            str = left(str, len(str) - 1);
+        }
+
+        return str;
     }
 }

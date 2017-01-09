@@ -46,4 +46,35 @@ component
     {
         return variables.instance.action;
     }
+
+    /**
+     * Performs the route action.
+     *
+     * @return any
+     */
+    public any function perform()
+    {
+        var action = this.getAction();
+
+        if (endsWith(action, ['.cfm', '.cfml'])) {
+            // Include file
+            saveContent variable = "routeContent" {
+                include '../../#action#';
+            }
+
+            writeOutput(routeContent);
+        } else {
+            // Plain text
+            var controller = listFirst(action, '@');
+            if (fileExists(getBaseDir('App/Controllers/#controller#.cfc'))) {
+                var component = createObject("component", "App.Controllers.#controller#");
+                var method = component.getMethod(listLast(action, '@'));
+                method();
+            } else {
+                writeOutput(action);
+            }
+        }
+
+        return this;
+    }
 }

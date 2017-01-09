@@ -1,13 +1,13 @@
 component
 {
-    public any function init(required string name, struct args = structNew())
+    public any function init(required string name, struct args = {})
     {
         this.name = name;
         this.args = args;
         this.file = getFile(name);
         this.content = fileRead(this.file);
         this.uniqueName = lCase(createUUID());
-        this.tempFile = "#expandPath('/')#Views\temp\#this.uniqueName#.cfm";
+        this.tempFile = getBaseDir("Views\temp\#this.uniqueName#.cfm");
         fileWrite(this.tempFile, this.content);
 
         saveContent variable = "viewContent" {
@@ -38,6 +38,6 @@ component
             this.paths = [name];
         }
 
-        return "#expandPath('/')#Views\#arrayToList(this.paths, '\')#.cfm";
+        return getBaseDir("Views\#arrayToList(this.paths, '\')#.cfm");
     }
 }
