@@ -56,7 +56,7 @@ component
     {
         var action = this.getAction();
 
-        if (endsWith(action, ['.cfm', '.cfml'])) {
+        if (endsWith(action, ['.cfm', '.cfml', 'html', 'htm'])) {
             // Include file
             saveContent variable = "routeContent" {
                 include '../../#action#';
