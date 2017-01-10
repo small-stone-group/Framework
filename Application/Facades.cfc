@@ -249,4 +249,14 @@ component
             second(timeValue)
         );
     }
+
+    /**
+     * Makes a human readable timestamp from the given datetime object.
+     *
+     * @return string
+     */
+    public string function humanTimestamp(required any t)
+    {
+        return "#lsDateFormat(t, 'dd/mm/yyyy')# #lsTimeFormat(t, 'HH:mm:ss')#";
+    }
 }
