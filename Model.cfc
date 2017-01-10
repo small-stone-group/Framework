@@ -502,6 +502,49 @@ component
     }
 
     /**
+     * Gets the latest record(s).
+     *
+     * @return any
+     */
+    public any function latest(numeric limit = 1, numeric skip = 0)
+    {
+        var records = variables.instance.queryBuilder
+            .select("*")
+            .from(variables.table)
+            .orderBy(this.getPrimaryKeyField(), 'desc')
+            .limit(arguments.limit)
+            .offset(arguments.skip)
+            .run();
+
+        if (limit == 1) {
+            return queryToModel(records, variables.model);
+        } else {
+            return queryToModels(records, variables.model);
+        }
+    }
+
+    /**
+     * Gets the oldest record(s).
+     *
+     * @return any
+     */
+    public any function oldest(numeric limit = 1, numeric skip = 0)
+    {
+        var records = variables.instance.queryBuilder
+            .select("*")
+            .from(variables.table)
+            .orderBy(this.getPrimaryKeyField(), 'asc')
+            .limit(arguments.limit)
+            .offset(arguments.skip)
+            .run();
+
+        if (limit == 1) {
+            return queryToModel(records, variables.model);
+        } else {
+            return queryToModels(records, variables.model);
+        }
+    }
+
      * Constructs a where clause in the query string.
      *
      * @param command <string>

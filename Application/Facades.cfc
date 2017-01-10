@@ -224,4 +224,29 @@ component
 
         return str;
     }
+
+    /**
+     * Joins a time object to a date object.
+     *
+     * @return any
+     */
+    public any function joinTime(required any dateValue, required any timeValue)
+    {
+        if (isValid("string", dateValue) && len(dateValue) == 0) {
+            dateValue = createDate(year(now()), month(now()), day(now()));
+        }
+
+        if (isValid("string", timeValue) && len(timeValue) == 0) {
+            timeValue = createTime(0, 0, 0);
+        }
+
+        return createDateTime(
+            year(dateValue),
+            month(dateValue),
+            day(dateValue),
+            hour(timeValue),
+            minute(timeValue),
+            second(timeValue)
+        );
+    }
 }
