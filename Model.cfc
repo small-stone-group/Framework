@@ -545,6 +545,20 @@ component
         }
     }
 
+    /**
+     * Gets records that are between two timestamps using the given field.
+     *
+     * @return any
+     */
+    public any function timeframe(required string column, required any from, required any to)
+    {
+        return this
+            .where('#column# >= #from#')
+            .andWhere('#column# <= #to#')
+            .getArray();
+    }
+
+    /**
      * Constructs a where clause in the query string.
      *
      * @param command <string>
