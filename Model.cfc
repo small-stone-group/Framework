@@ -7,7 +7,6 @@ component
     variables.ignoreDefaults = ["CURRENT_TIMESTAMP"];
     variables.columns = [];
     variables.columnTypes = {};
-    variables.instance.cacheTimespan = createTimeSpan(0,0,1,0);
     variables.instance.hasSelect = false;
     variables.instance.queryBuilder = new App.Framework.QueryBuilder();
     variables.instance.takingSingular = false;
@@ -739,7 +738,6 @@ component
     {
         var schema = new Query();
         schema.setDatasource(variables.datasource);
-        schema.setCachedWithin(variables.instance.cacheTimespan);
         return schema;
     }
 

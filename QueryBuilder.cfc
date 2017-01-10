@@ -1,7 +1,6 @@
 component
 {
     this.datasource = getDatasource();
-    this.cacheTimespan = createTimeSpan(0,0,1,0);
     this.queries = [];
     this.params = [];
 
@@ -143,7 +142,6 @@ component
         this.queries = [];
 
         schema.setDatasource(this.datasource);
-        schema.setCachedWithin(this.cacheTimespan);
         schema.setSQL(statement);
 
         for (param in this.params) {
