@@ -550,11 +550,12 @@ component
      *
      * @return any
      */
-    public any function timeframe(required string column, required any from, required any to)
+    public any function timeframe(required string column, required any from, required any to, string order = 'asc')
     {
         return this
             .where('#column# >= #from#')
             .andWhere('#column# <= #to#')
+            .orderBy(column, order)
             .getArray();
     }
 
