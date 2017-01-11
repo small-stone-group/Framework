@@ -343,7 +343,10 @@ component
             }
 
             if (!arrayIsEmpty(this.relationships)) {
-                statement &= ", #nl#";
+                if (!arrayIsEmpty(this.columns)) {
+                    statement &= ", #nl#";
+                }
+
                 index = 1;
 
                 for (rel in this.relationships) {
