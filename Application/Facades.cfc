@@ -251,12 +251,57 @@ component
     }
 
     /**
-     * Makes a human readable timestamp from the given datetime object.
+     * Makes a human readable timestamp from the given datetime object(s).
+     * Eg. 12 minutes ago, 1 day ago, 4 weeks ago.
      *
      * @return string
      */
-    public string function humanTimestamp(required any t)
+    public string function humanTimeDiff(required any from, any to = {})
     {
-        return "#lsDateFormat(t, 'dd/mm/yyyy')# #lsTimeFormat(t, 'HH:mm:ss')#";
+        if (isValid("struct", to)) {
+            to = now();
+        }
+     
+        var diff = dateDiff("s", from, to);
+        var since = 'Just now';
+        var sMinute = 60;
+        var sHour = 60 * sMinute;
+        var sDay = 24 * sHour;
+        var sWeek = 7 * sDay;
+        var sMonth = 4 * sWeek;
+        var sYear = 12 * sMonth;
+     
+        if (diff < sHour) {
+            mins = round(diff / sHour);
+            if (mins <= 1) mins = 1;
+            since = '#mins# minute';
+            if (mins > 1) since &= 's';
+        } else if (diff < sDay && diff >= sHour) {
+            hours = round(diff / sHour);
+            if (hours <= 1) hours = 1;
+            since = '#hours# hour';
+            if (hours > 1) since &= 's';
+        } else if (diff < sWeek && diff >= sDay) {
+            days = round(diff / sDay);
+            if (days <= 1) days = 1;
+            since = '#days# day';
+            if (days > 1) since &= 's';
+        } else if (diff < sMonth && diff >= sWeek) {
+            weeks = round(diff / sWeek);
+            since = '#weeks# week';
+            if (weeks > 1) since &= 's';
+        } else if (diff < sYear && diff >= sMonth) {
+            months = round(diff / sMonth);
+            if (months <= 1) months = 1;
+            since = '#months# month';
+            if (months > 1) since &= 's';
+        } else if (diff >= sYear) {
+            years = round(diff / sYear);
+            if (years <= 1) years = 1;
+            since = '#years# year';
+            if (years > 1) since &= 's';
+        }
+
+        return '#since# ago';
     }
 }
