@@ -272,7 +272,7 @@ component
         var sYear = 12 * sMonth;
      
         if (diff < sHour) {
-            mins = round(diff / sHour);
+            mins = round(diff / sMinute);
             if (mins <= 1) mins = 1;
             since = '#mins# minute';
             if (mins > 1) since &= 's';
