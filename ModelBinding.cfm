@@ -15,6 +15,11 @@
                     .init(val(form.mb_id))
                     .save(form);
                 break;
+            case 'create':
+                createObject('component', 'App.#form.mb_name#')
+                    .init()
+                    .save(form);
+                break;
         }
     } catch (any error) {
         writeDumpToFile(error);
