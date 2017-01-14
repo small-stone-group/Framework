@@ -208,12 +208,38 @@ component
     }
 
     /**
+     * Checks whether the given string starts with the given substring(s).
+     *
+     * @return boolean
+     */
+    public boolean function startsWith(required string str, required any substr)
+    {
+        if (isArray(substr)) {
+            for (s in substr) {
+                if (left(str, len(s)) == s) {
+                    return true;
+                }
+            }
+        } else {
+            if (left(str, len(substr)) == substr) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Strips leading and trailing slashes.
      *
      * @return any
      */
     public string function stripSlashes(required string str)
     {
+        if (str == '/' || str == '\') {
+            return '';
+        }
+
         if (left(str, 1) == '/' || left(str, 1) == '\') {
             str = right(str, len(str) - 1);
         }
