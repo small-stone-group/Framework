@@ -15,9 +15,9 @@ component
      *
      * @return view
      */
-    public any function view(required string name, struct args = {})
+    public any function view(string name = "", struct args = {}, boolean returnEarly = false)
     {
-        return new App.Framework.View(name, args);
+        return new App.Framework.View(name, args, returnEarly);
     }
 
     /**
