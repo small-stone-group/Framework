@@ -7,6 +7,10 @@ component
      */
     public any function init(string name = "", struct args = {}, boolean returnEarly = false)
     {
+        if (!directoryExists(getBaseDir('Views/temp'))) {
+            directoryCreate(getBaseDir('Views/temp'));
+        }
+
         if (name == "") {
             return this;
         }
