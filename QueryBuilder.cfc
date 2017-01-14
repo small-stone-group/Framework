@@ -145,7 +145,11 @@ component
         schema.setSQL(statement);
 
         for (param in this.params) {
-            schema.addParam(name = param.name, value = param.value, cfsqltype = param.cfsqltype);
+            if (structKeyExists(param, 'scale')) {
+                schema.addParam(name = param.name, value = param.value, cfsqltype = param.cfsqltype, scale = param.scale);
+            } else {
+                schema.addParam(name = param.name, value = param.value, cfsqltype = param.cfsqltype);
+            }
         }
 
         var result = schema.execute();

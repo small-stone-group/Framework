@@ -158,11 +158,17 @@ component
                     loc.assignments &= ", ";
                 }
 
-                variables.instance.queryBuilder.addParams([{
+                var sqlParamData = {
                     "name" = loc.field,
                     "value" = loc.fieldValue,
                     "cfsqltype" = (loc.isFreshBinary) ? "CF_SQL_VARCHAR" : loc.fieldSQLType
-                }]);
+                };
+
+                if (loc.fieldSQLType == 'CF_SQL_DECIMAL') {
+                    structInsert(sqlParamData, 'scale', len(listLast(loc.fieldValue, '.')));
+                }
+
+                variables.instance.queryBuilder.addParams([sqlParamData]);
             }
 
             loc.update = variables.instance.queryBuilder
@@ -203,11 +209,17 @@ component
                     loc.values &= ", ";
                 }
 
-                variables.instance.queryBuilder.addParams([{
+                var sqlParamData = {
                     "name" = lCase(loc.field),
                     "value" = loc.fieldValue,
                     "cfsqltype" = (loc.isFreshBinary) ? "CF_SQL_VARCHAR" : loc.fieldSQLType
-                }]);
+                };
+
+                if (uCase(loc.fieldSQLType) == 'CF_SQL_DECIMAL') {
+                    structInsert(sqlParamData, 'scale', len(listLast('#loc.fieldValue#', '.')));
+                }
+
+                variables.instance.queryBuilder.addParams([sqlParamData]);
             }
 
             loc.createResult = variables.instance.queryBuilder
