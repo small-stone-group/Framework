@@ -16,9 +16,10 @@
                     .save(form);
                 break;
             case 'create':
-                createObject('component', 'App.#form.mb_name#')
+                m = createObject('component', 'App.#form.mb_name#')
                     .init()
                     .save(form);
+                writeOutput(serializeJSON(m));
                 break;
         }
     } catch (any error) {
