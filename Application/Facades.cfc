@@ -330,4 +330,15 @@ component
 
         return '#since# ago';
     }
+
+    /**
+     * Gets an array of lines in the given file.
+     *
+     * @return array
+     */
+    public array function fileToLines(required string filePath)
+    {
+        return new App.Framework.Legacy().fileToLines(filePath);
+    }
+
 }
