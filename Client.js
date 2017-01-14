@@ -1,3 +1,8 @@
+getUrl = function(uri)
+{
+    return window.location.protocol + "//" + window.location.hostname + "/" + uri;
+}
+
 class Model
 {
     constructor(name, id)
@@ -8,7 +13,7 @@ class Model
 
     delete(callback)
     {
-        $.post('App/Framework/ModelBinding.cfm', {
+        $.post(getUrl('App/Framework/ModelBinding.cfm'), {
             'mb_method': 'delete',
             'mb_name': this.name,
             'mb_id': this.id
@@ -39,7 +44,7 @@ class Model
 
         $.ajax({
             type: 'POST',
-            url: 'App/Framework/ModelBinding.cfm',
+            url: getUrl('App/Framework/ModelBinding.cfm'),
             data: d,
             contentType: false,
             processData: false,
@@ -62,12 +67,13 @@ class Model
 
         $.ajax({
             type: 'POST',
-            url: 'App/Framework/ModelBinding.cfm',
+            url: getUrl('App/Framework/ModelBinding.cfm'),
             data: d,
             contentType: false,
             processData: false,
             success: function(data) {
-                callback(data);
+                var obj = JSON.parse(data);
+                callback(obj);
             }
         });
     }
@@ -94,13 +100,14 @@ class Model
 }
 
 ;(function($) {
-    $.fn.routeContent = function(controller, method)
+    $.fn.routeContent = function(controller, method, args)
     {
         var el = $(this);
 
         $.ajax({
-            type: 'GET',
-            url: 'App/Framework/Request.cfm?controller=' + controller + '&method=' + method,
+            type: 'POST',
+            url: getUrl('App/Framework/Request.cfm?controller=' + controller + '&method=' + method),
+            data: args,
             success: function(data) {
                 el.html(data);
             }
