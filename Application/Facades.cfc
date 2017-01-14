@@ -341,4 +341,25 @@ component
         return new App.Framework.Legacy().fileToLines(filePath);
     }
 
+    /**
+     * Gets the request view contents.
+     *
+     * @return string
+     */
+    public string function includeContent()
+    {
+        return request.viewContent;
+    }
+
+    /**
+     * Includes the view contents.
+     * Doesn't support passing of arguments.
+     *
+     * @return any
+     */
+    public any function includeView(required string viewName)
+    {
+        var path = view().getFileRel(viewName);
+        include '../#path#';
+    }
 }
