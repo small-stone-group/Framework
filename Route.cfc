@@ -1,5 +1,8 @@
 component
 {
+    this.ignore = [];
+    this.ignoreExtensions = ['.cfm', '.cfml', 'html', 'htm', 'ico'];
+
     /**
      * Constructor function for the component.
      *
@@ -30,7 +33,7 @@ component
      *
      * @return any
      */
-    public any function handle()
+    public any function handle(string requestedPage)
     {
         if (structKeyExists(url, "controller") && structKeyExists(url, "method")) {
             var component = createObject("component", "App.Controllers.#url.controller#");
@@ -39,13 +42,18 @@ component
             return this;
         }
 
-        try {
-            if (structKeyExists(url, 'url_payload')) {
-                route().findURI(url.url_payload).perform();
-            }
-        } catch (any error) {
-            writeDump(error);
+        if (lCase(stripSlashes(cgi.script_name)) != 'index.cfm') {
+            include requestedPage;
             return this;
+        }
+
+        var payloadURI = (structKeyExists(url, 'url_payload')) ? url.url_payload : '/';
+        var r = route().findURI(payloadURI);
+
+        if (!isValid('array', r)) {
+            r.perform(r.params);
+        } else {
+            include requestedPage;
         }
 
         return this;
@@ -85,19 +93,56 @@ component
         var routeURI = [];
 
         for (route in request.routes) {
-            if (
-                lCase(stripSlashes(route.getURI())) == lCase(stripSlashes(uri)) &&
-                lCase(route.getType()) == lCase(cgi.request_method)
-            ) {
-                routeURI = route;
-                break;
+            if (lCase(route.getType()) == lCase(cgi.request_method)) {
+                var vars = this.extractVars(route.getURI());
+                var keys = listToArray(lCase(stripSlashes(uri)), '/');
+                var page = (arrayLen(keys) >= 1) ? keys[1] : '';
+                var params = {};
+
+                // Remove first key that indicates page
+                if (arrayLen(keys) >= 1) {
+                    arrayDeleteAt(keys, 1);
+                }
+
+                for (var v = 1; v <= arrayLen(vars); v++) {
+                    if (arrayIsDefined(keys, v)) {
+                        structInsert(params, vars[v], val(keys[v]));
+                    }
+                }
+
+                if (lCase(route.getPage()) == lCase(page)) {
+                    routeURI = route;
+                    routeURI.params = params;
+                    break;
+                }
             }
         }
 
-        if (isArray(routeURI)) {
+        if (isArray(routeURI) && stripSlashes(uri) != '' && !arrayContains(this.ignore, uri) && !arrayContains(this.ignoreExtensions, listLast(uri, '.'))) {
             throw(message = "Route directive for page '#uri#' using method #cgi.request_method# does not exist.");
         }
 
         return routeURI;
+    }
+
+    /**
+     * Extracts variables from a URI.
+     *
+     * @return any
+     */
+    public any function extractVars(required string uri)
+    {
+        var items = listToArray(uri, '/');
+        var result = [];
+
+        for (i in items) {
+            if (startsWith(i, '{') && endsWith(i, '}')) {
+                var key = left(i, len(i) - 1);
+                key = right(key, len(key) - 1);
+                arrayAppend(result, key);
+            }
+        }
+
+        return result;
     }
 }

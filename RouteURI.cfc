@@ -18,6 +18,16 @@ component
     }
 
     /**
+     * Gets the page from the URI.
+     *
+     * @return string
+     */
+    public string function getPage()
+    {
+        return listFirst(stripSlashes(variables.instance.uri), '/');
+    }
+
+    /**
      * Gets the raw URI.
      *
      * @return string
@@ -52,13 +62,17 @@ component
      *
      * @return any
      */
-    public any function perform()
+    public any function perform(struct params = {})
     {
         var action = this.getAction();
 
-        if (endsWith(action, ['.cfm', '.cfml', 'html', 'htm'])) {
+        if (endsWith(action, ['.cfm', '.cfml', 'html', 'htm', 'ico'])) {
             // Include file
             saveContent variable = "routeContent" {
+                for (p in params) {
+                    setVariable(p, params[p]);
+                }
+
                 include '../../#action#';
             }
 
@@ -69,9 +83,14 @@ component
             if (fileExists(getBaseDir('App/Controllers/#controller#.cfc'))) {
                 var component = createObject("component", "App.Controllers.#controller#");
                 var method = component.getMethod(listLast(action, '@'));
-                method();
+                method(params);
             } else {
-                writeOutput(action);
+                var viewFile = view().getFile(action);
+                if (fileExists(viewFile)) {
+                    view(action, params);
+                } else {
+                    writeOutput(action);
+                }
             }
         }
 
