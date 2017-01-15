@@ -33,7 +33,7 @@ component
      *
      * @return any
      */
-    public any function handle(string requestedPage)
+    public any function handle(string requestedPage = '')
     {
         if (structKeyExists(url, "controller") && structKeyExists(url, "method")) {
             var component = createObject("component", "App.Controllers.#url.controller#");
