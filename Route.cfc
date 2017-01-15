@@ -84,6 +84,34 @@ component
     }
 
     /**
+     * Establishes a resource route.
+     * Also creates the file if it doesn't already exist.
+     *
+     * @return any
+     */
+    public any function resource(required string page, required string controller)
+    {
+        this.get(page, '#controller#@index');
+        this.get('#page#/create', '#controller#@create');
+        this.get('#page#/{id}', '#controller#@show');
+        this.get('#page#/{id}/edit', '#controller#@edit');
+        
+        this.post(page, '#controller#@store');
+        this.post('#page#/{id}', '#controller#@update');
+        this.post('#page#/{id}/delete', '#controller#@delete');
+
+        var controllerPath = getBaseDir('/App/Controllers/#controller#.cfc');
+
+        if (!fileExists(controllerPath)) {
+            saveContent variable = "templateContent" {
+                include "ResourceTemplate.cfm";
+            }
+
+            fileWrite(controllerPath, templateContent);
+        }
+    }
+
+    /**
      * Finds the given URI in the request routes.
      *
      * @return any

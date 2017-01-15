@@ -92,13 +92,8 @@ component
      */
     public string function getBaseDir(string path = '', boolean create = false)
     {
-        var baseDir = application.mvc.baseDirectory;
-
-        if (arrayContains(['/', '\'], right(baseDir, 1))) {
-            baseDir = left(baseDir, len(baseDir) - 1);
-        }
-
-        var targetDir = '#baseDir#\#path#';
+        var baseDir = stripTrailingSlashes(application.mvc.baseDirectory);
+        var targetDir = '#baseDir#\#stripSlashes(replace(path, '/', '\', 'all'))#';
 
         if (create && !directoryExists(targetDir)) {
             directoryCreate(targetDir);
@@ -114,13 +109,8 @@ component
      */
     public string function getDataDir(string path = '', boolean create = false)
     {
-        var dataDir = application.mvc.dataDirectory;
-
-        if (arrayContains(['/', '\'], right(dataDir, 1))) {
-            dataDir = left(dataDir, len(dataDir) - 1);
-        }
-
-        var targetDir = '#dataDir#\#path#';
+        var dataDir = stripTrailingSlashes(application.mvc.dataDirectory);
+        var targetDir = '#dataDir#\#stripSlashes(replace(path, '/', '\', 'all'))#';
 
         if (create && !directoryExists(targetDir)) {
             directoryCreate(targetDir);
@@ -230,11 +220,11 @@ component
     }
 
     /**
-     * Strips leading and trailing slashes.
+     * Strips leading slashes.
      *
      * @return any
      */
-    public string function stripSlashes(required string str)
+    public any function stripLeadingSlashes(required string str)
     {
         if (str == '/' || str == '\') {
             return '';
@@ -244,11 +234,35 @@ component
             str = right(str, len(str) - 1);
         }
 
+        return str;
+    }
+
+    /**
+     * Strips trailing slashes.
+     *
+     * @return any
+     */
+    public any function stripTrailingSlashes(required string str)
+    {
+        if (str == '/' || str == '\') {
+            return '';
+        }
+
         if (right(str, 1) == '/' || right(str, 1) == '\') {
             str = left(str, len(str) - 1);
         }
 
         return str;
+    }
+
+    /**
+     * Strips leading and trailing slashes.
+     *
+     * @return any
+     */
+    public string function stripSlashes(required string str)
+    {
+        return stripTrailingSlashes(stripLeadingSlashes(str));
     }
 
     /**
@@ -360,6 +374,16 @@ component
     public any function includeView(required string viewName)
     {
         var path = view().getFileRel(viewName);
-        include '../#path#';
+        include path;
+    }
+
+    /**
+     * Gets the absolute path of where this method is called from.
+     *
+     * @return string
+     */
+    public string function getCurrentPath(string uri = '')
+    {
+        return getDirectoryFromPath(getCurrentTemplatePath()) & uri;
     }
 }
