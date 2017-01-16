@@ -9,11 +9,12 @@ component
      *
      * @return any
      */
-    public any function init(required string type, required string uri, required string action)
+    public any function init(required string type, required string uri, required string action, string middleware = '')
     {
         variables.instance.type = type;
         variables.instance.uri = uri;
         variables.instance.action = action;
+        variables.instance.middleware = middleware;
         return this;
     }
 
@@ -55,6 +56,36 @@ component
     public string function getAction()
     {
         return variables.instance.action;
+    }
+
+    /**
+     * Checks whether the given middleware group passes.
+     *
+     * @return any
+     */
+    public any function checkMiddleware()
+    {
+        if (variables.instance.middleware == '') {
+            return this;
+        }
+
+        var path = getBaseDir('/App/Middleware/#variables.instance.middleware#.cfc');
+
+        if (fileExists(path)) {
+            var passes = createObject('component', 'App.Middleware.#variables.instance.middleware#').init();
+
+            if (!isValid('boolean', passes)) {
+                throw(message = "Middleware '#variables.instance.middleware#' does not return a boolean value");
+            }
+
+            if (passes) {
+                return this;
+            } else {
+                throw(message = "Middleware '#variables.instance.middleware#' did not pass");
+            }
+        } else {
+            throw(message = "Middleware file '#path#' does not exist");
+        }
     }
 
     /**

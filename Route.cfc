@@ -2,6 +2,7 @@ component
 {
     this.ignore = [];
     this.ignoreExtensions = ['.cfm', '.cfml', 'html', 'htm', 'ico'];
+    this.currentMiddleware = '';
 
     /**
      * Constructor function for the component.
@@ -51,7 +52,7 @@ component
         var r = route().findURI(payloadURI);
 
         if (!isValid('array', r)) {
-            r.perform(r.params);
+            r.checkMiddleware().perform(r.params);
         } else {
             include requestedPage;
         }
@@ -66,7 +67,7 @@ component
      */
     public any function get(required string uri, required string action)
     {
-        var routeURI = new App.Framework.RouteURI('get', uri, action);
+        var routeURI = new App.Framework.RouteURI('get', uri, action, this.currentMiddleware);
         arrayAppend(request.routes, routeURI);
         return routeURI;
     }
@@ -78,7 +79,7 @@ component
      */
     public any function post(required string uri, required string action)
     {
-        var routeURI = new App.Framework.RouteURI('post', uri, action);
+        var routeURI = new App.Framework.RouteURI('post', uri, action, this.currentMiddleware);
         arrayAppend(request.routes, routeURI);
         return routeURI;
     }
@@ -109,6 +110,17 @@ component
 
             fileWrite(controllerPath, templateContent);
         }
+    }
+
+    /**
+     * Constructs a middleware group.
+     *
+     * @return any
+     */
+    public any function middleware(required string name)
+    {
+        this.currentMiddleware = name;
+        return this;
     }
 
     /**
@@ -146,7 +158,12 @@ component
             }
         }
 
-        if (isArray(routeURI) && stripSlashes(uri) != '' && !arrayContains(this.ignore, uri) && !arrayContains(this.ignoreExtensions, listLast(uri, '.'))) {
+        if (
+            isArray(routeURI) &&
+            stripSlashes(uri) != '' &&
+            !arrayContains(this.ignore, uri) &&
+            !arrayContains(this.ignoreExtensions, listLast(uri, '.'))
+        ) {
             throw(message = "Route directive for page '#uri#' using method #cgi.request_method# does not exist.");
         }
 
