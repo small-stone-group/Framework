@@ -25,4 +25,14 @@ component
         // Handle the request
         route().handle(thePage);
     }
+
+    /**
+     * Handles the start of a session.
+     *
+     * @return any
+     */
+    public any function onSessionStart()
+    {
+        auth().login();
+    }
 }

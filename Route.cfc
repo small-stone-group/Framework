@@ -69,7 +69,7 @@ component
     {
         var routeURI = new App.Framework.RouteURI('get', uri, action, this.currentMiddleware);
         arrayAppend(request.routes, routeURI);
-        return routeURI;
+        return this;
     }
 
     /**
@@ -81,7 +81,7 @@ component
     {
         var routeURI = new App.Framework.RouteURI('post', uri, action, this.currentMiddleware);
         arrayAppend(request.routes, routeURI);
-        return routeURI;
+        return this;
     }
 
     /**

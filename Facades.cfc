@@ -51,6 +51,16 @@ component
     }
 
     /**
+     * Returns a new authentication object.
+     *
+     * @return any
+     */
+    public any function auth()
+    {
+        return new App.Framework.Auth();
+    }
+
+    /**
      * Returns the user object in the session.
      *
      * @return user
