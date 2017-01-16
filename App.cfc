@@ -10,8 +10,9 @@ component
      */
     public void function onRequestStart()
     {
-        // Run the web routes
+        // Add the web routes
         new web();
+        onSessionStart();
     }
 
     /**
@@ -33,6 +34,7 @@ component
      */
     public any function onSessionStart()
     {
+        // Attempt to login the user
         auth().login();
     }
 }
