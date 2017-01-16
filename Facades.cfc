@@ -386,4 +386,89 @@ component
     {
         return getDirectoryFromPath(getCurrentTemplatePath()) & uri;
     }
+
+    /**
+     * Makes a timestamp object from a string.
+     * Date separators can be one of (\ / . - _ |).
+     * Time separator must be colon (:).
+     *
+     * @return any
+     */
+    public any function makeTimestamp(required string ts)
+    {
+        var separator = '';
+        var tsTime = '';
+        var tsYear = -1;
+        var tsMonth = -1;
+        var tsDay = -1;
+        var tsHour = 0;
+        var tsMinute = 0;
+        var tsSecond = 0;
+
+        // Find separator used
+        for (c in ['\', '/', '.', '-', '_', '|']) {
+            if (find(c, ts) != 0) {
+                separator = c;
+                break;
+            }
+        }
+
+        // Throw exception if no valid separator used
+        if (separator == '') {
+            throw(message = "Invalid separator used in makeTimestamp()");
+            return;
+        }
+
+        // Find hour separator
+        // Move time string to tsTime
+        if (find(':', ts) != 0) {
+            tsTime = listLast(ts, ' ');
+            ts = left(ts, len(ts) - len(tsTime));
+        }
+
+        var digits = listToArray(ts, separator);
+        var index = 1;
+        var reverse = 1;
+        var timeIndex = 1;
+
+        // Set time values
+        for (dt in listToArray(tsTime, ':')) {
+            switch (timeIndex) {
+                case 1: tsHour = val(dt); break;
+                case 2: tsMinute = val(dt); break;
+                case 3: tsSecond = val(dt); break;
+            }
+
+            timeIndex++;
+        }
+
+        // Set date values
+        for (d in digits) {
+            if (len(d) == 4 && index == 1) {
+                tsYear = val(d);
+                reverse = 10;
+            } else {
+                switch (index * reverse) {
+                    case 1: tsDay = val(d); break;
+                    case 2: tsMonth = val(d); break;
+                    case 3: tsYear = val(d); break;
+                    case 10: tsYear = val(d); break;
+                    case 20: tsMonth = val(d); break;
+                    case 30: tsDay = val(d); break;
+                }
+            }
+
+            index++;
+        }
+
+        // Return timestamp object
+        return createDateTime(
+            tsYear,
+            tsMonth,
+            tsDay,
+            tsHour,
+            tsMinute,
+            tsSecond
+        );
+    }
 }
