@@ -69,6 +69,19 @@ component
     }
 
     /**
+     * Run raw SQL string and return its result.
+     *
+     * @return any
+     */
+    public any function sql(required string statement)
+    {
+        var schema = new Query();
+        schema.setDatasource(variables.datasource);
+        schema.setSQL(statement);
+        return schema.execute().getResult();
+    }
+
+    /**
      * Find the given record.
      *
      * @param id <integer>
@@ -876,7 +889,7 @@ component
             case "enum": return "CF_SQL_VARCHAR"; break;
         }
 
-        throw(message = "[Model] Cannot find type for #arguments.type#");
+        throw(message = "[Model] Cannot find CF SQL type for '#arguments.type#'");
     }
 
     /**
