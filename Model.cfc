@@ -69,6 +69,21 @@ component
     }
 
     /**
+     * Verifies the given string against an encrypted column.
+     * If verification is successful, returns true.
+     *
+     * @return boolean
+     */
+    public boolean function verify(required string column, required string str)
+    {
+        var encryptedString = variables.instance.queryBuilder
+            .select("(#variables.encryptionMethod#('#str#')) AS encryptedString")
+            .run().encryptedString;
+
+        return (toString(encryptedString) == toString(this[column]));
+    }
+
+    /**
      * Find the given record.
      *
      * @param id <integer>

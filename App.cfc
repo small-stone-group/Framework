@@ -12,7 +12,6 @@ component
     {
         // Add the web routes
         new web();
-        onSessionStart();
     }
 
     /**

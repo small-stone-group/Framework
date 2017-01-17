@@ -164,7 +164,13 @@ component
             !arrayContains(this.ignore, uri) &&
             !arrayContains(this.ignoreExtensions, listLast(uri, '.'))
         ) {
-            throw(message = "Route directive for page '#uri#' using method #cgi.request_method# does not exist.");
+            view('layouts.index|errors.404', {
+                'title' = 'Page not found',
+                'nav' = false,
+                'message' = "Route directive for page '#uri#' using method #cgi.request_method# does not exist."
+            });
+
+            abort;
         }
 
         return routeURI;

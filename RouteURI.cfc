@@ -75,16 +75,23 @@ component
             var passes = createObject('component', 'App.Middleware.#variables.instance.middleware#').init();
 
             if (!isValid('boolean', passes)) {
-                throw(message = "Middleware '#variables.instance.middleware#' does not return a boolean value");
+                throw("Middleware '#variables.instance.middleware#' does not return a boolean value");
             }
 
             if (passes) {
                 return this;
             } else {
-                throw(message = "Middleware '#variables.instance.middleware#' did not pass");
+                view('layouts.index|errors.401', {
+                    'title' = 'Unauthenticated',
+                    'nav' = false,
+                    'heading' = 'You are not logged in',
+                    'message' = 'You need to login to access that page.'
+                });
+
+                abort;
             }
         } else {
-            throw(message = "Middleware file '#path#' does not exist");
+            throw("Middleware file '#path#' does not exist");
         }
     }
 

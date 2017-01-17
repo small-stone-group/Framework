@@ -35,10 +35,32 @@ component
      *
      * @return any
      */
-    public any function login(any targetUser = {})
+    public any function login(any targetUser = {}, boolean remember = false)
     {
-        var userRecord = new App.Controllers.AuthController().login(this.token(), targetUser);
+        var userRecord = new App.Controllers.AuthController().tokenLogin(this.token(), targetUser, remember);
         session.auth = userRecord;
+    }
+
+    /**
+     * Unauthenticates the user.
+     *
+     * @return any
+     */
+    public any function logout(boolean clearCookie = true)
+    {
+        if (this.guest()) {
+            return;
+        }
+
+        session.auth = {};
+
+        if (clearCookie) {
+            if (structKeyExists(cookie, 'cfuser')) {
+                structDelete(cookie, cfuser);
+            }
+
+            new App.Framework.Legacy().cookie('cfuser', '', now());
+        }
     }
 
     /**

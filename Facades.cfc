@@ -61,13 +61,13 @@ component
     }
 
     /**
-     * Returns the user object in the session.
+     * Returns a new redirect object.
      *
-     * @return user
+     * @return any
      */
-    public any function user()
+    public any function redirect()
     {
-        return session.user;
+        return new App.Framework.Redirect();
     }
 
     /**
