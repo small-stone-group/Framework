@@ -15,9 +15,9 @@ component
      *
      * @return view
      */
-    public any function view(required string name, struct args = {})
+    public any function view(string name = "", struct args = {}, boolean returnEarly = false)
     {
-        return new App.Framework.View(name, args);
+        return new App.Framework.View(name, args, returnEarly);
     }
 
     /**
@@ -51,13 +51,23 @@ component
     }
 
     /**
-     * Returns the user object in the session.
+     * Returns a new authentication object.
      *
-     * @return user
+     * @return any
      */
-    public any function user()
+    public any function auth()
     {
-        return session.user;
+        return new App.Framework.Auth();
+    }
+
+    /**
+     * Returns a new redirect object.
+     *
+     * @return any
+     */
+    public any function redirect()
+    {
+        return new App.Framework.Redirect();
     }
 
     /**
@@ -92,13 +102,8 @@ component
      */
     public string function getBaseDir(string path = '', boolean create = false)
     {
-        var baseDir = application.mvc.baseDirectory;
-
-        if (arrayContains(['/', '\'], right(baseDir, 1))) {
-            baseDir = left(baseDir, len(baseDir) - 1);
-        }
-
-        var targetDir = '#baseDir#\#path#';
+        var baseDir = stripTrailingSlashes(application.mvc.baseDirectory);
+        var targetDir = '#baseDir#\#stripSlashes(replace(path, '/', '\', 'all'))#';
 
         if (create && !directoryExists(targetDir)) {
             directoryCreate(targetDir);
@@ -114,13 +119,8 @@ component
      */
     public string function getDataDir(string path = '', boolean create = false)
     {
-        var dataDir = application.mvc.dataDirectory;
-
-        if (arrayContains(['/', '\'], right(dataDir, 1))) {
-            dataDir = left(dataDir, len(dataDir) - 1);
-        }
-
-        var targetDir = '#dataDir#\#path#';
+        var dataDir = stripTrailingSlashes(application.mvc.dataDirectory);
+        var targetDir = '#dataDir#\#stripSlashes(replace(path, '/', '\', 'all'))#';
 
         if (create && !directoryExists(targetDir)) {
             directoryCreate(targetDir);
@@ -208,14 +208,54 @@ component
     }
 
     /**
-     * Strips leading and trailing slashes.
+     * Checks whether the given string starts with the given substring(s).
+     *
+     * @return boolean
+     */
+    public boolean function startsWith(required string str, required any substr)
+    {
+        if (isArray(substr)) {
+            for (s in substr) {
+                if (left(str, len(s)) == s) {
+                    return true;
+                }
+            }
+        } else {
+            if (left(str, len(substr)) == substr) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Strips leading slashes.
      *
      * @return any
      */
-    public string function stripSlashes(required string str)
+    public any function stripLeadingSlashes(required string str)
     {
+        if (str == '/' || str == '\') {
+            return '';
+        }
+
         if (left(str, 1) == '/' || left(str, 1) == '\') {
             str = right(str, len(str) - 1);
+        }
+
+        return str;
+    }
+
+    /**
+     * Strips trailing slashes.
+     *
+     * @return any
+     */
+    public any function stripTrailingSlashes(required string str)
+    {
+        if (str == '/' || str == '\') {
+            return '';
         }
 
         if (right(str, 1) == '/' || right(str, 1) == '\') {
@@ -223,6 +263,16 @@ component
         }
 
         return str;
+    }
+
+    /**
+     * Strips leading and trailing slashes.
+     *
+     * @return any
+     */
+    public string function stripSlashes(required string str)
+    {
+        return stripTrailingSlashes(stripLeadingSlashes(str));
     }
 
     /**
@@ -272,7 +322,7 @@ component
         var sYear = 12 * sMonth;
      
         if (diff < sHour) {
-            mins = round(diff / sHour);
+            mins = round(diff / sMinute);
             if (mins <= 1) mins = 1;
             since = '#mins# minute';
             if (mins > 1) since &= 's';
@@ -303,5 +353,132 @@ component
         }
 
         return '#since# ago';
+    }
+
+    /**
+     * Gets an array of lines in the given file.
+     *
+     * @return array
+     */
+    public array function fileToLines(required string filePath)
+    {
+        return new App.Framework.Legacy().fileToLines(filePath);
+    }
+
+    /**
+     * Gets the request view contents.
+     *
+     * @return string
+     */
+    public string function includeContent()
+    {
+        return request.viewContent;
+    }
+
+    /**
+     * Includes the view contents.
+     * Doesn't support passing of arguments.
+     *
+     * @return any
+     */
+    public any function includeView(required string viewName)
+    {
+        var path = view().getFileRel(viewName);
+        include path;
+    }
+
+    /**
+     * Gets the absolute path of where this method is called from.
+     *
+     * @return string
+     */
+    public string function getCurrentPath(string uri = '')
+    {
+        return getDirectoryFromPath(getCurrentTemplatePath()) & uri;
+    }
+
+    /**
+     * Makes a timestamp object from a string.
+     * Date separators can be one of (\ / . - _ |).
+     * Time separator must be colon (:).
+     *
+     * @return any
+     */
+    public any function makeTimestamp(required string ts)
+    {
+        var separator = '';
+        var tsTime = '';
+        var tsYear = -1;
+        var tsMonth = -1;
+        var tsDay = -1;
+        var tsHour = 0;
+        var tsMinute = 0;
+        var tsSecond = 0;
+
+        // Find separator used
+        for (c in ['\', '/', '.', '-', '_', '|']) {
+            if (find(c, ts) != 0) {
+                separator = c;
+                break;
+            }
+        }
+
+        // Throw exception if no valid separator used
+        if (separator == '') {
+            throw(message = "Invalid separator used in makeTimestamp()");
+            return;
+        }
+
+        // Find hour separator
+        // Move time string to tsTime
+        if (find(':', ts) != 0) {
+            tsTime = listLast(ts, ' ');
+            ts = left(ts, len(ts) - len(tsTime));
+        }
+
+        var digits = listToArray(ts, separator);
+        var index = 1;
+        var reverse = 1;
+        var timeIndex = 1;
+
+        // Set time values
+        for (dt in listToArray(tsTime, ':')) {
+            switch (timeIndex) {
+                case 1: tsHour = val(dt); break;
+                case 2: tsMinute = val(dt); break;
+                case 3: tsSecond = val(dt); break;
+            }
+
+            timeIndex++;
+        }
+
+        // Set date values
+        for (d in digits) {
+            if (len(d) == 4 && index == 1) {
+                tsYear = val(d);
+                reverse = 10;
+            } else {
+                switch (index * reverse) {
+                    case 1: tsDay = val(d); break;
+                    case 2: tsMonth = val(d); break;
+                    case 3: tsYear = val(d); break;
+                    case 10: tsYear = val(d); break;
+                    case 20: tsMonth = val(d); break;
+                    case 30: tsDay = val(d); break;
+                }
+            }
+
+            index++;
+        }
+
+        // Return timestamp object
+        return createDateTime(
+            tsYear,
+            tsMonth,
+            tsDay,
+            tsHour,
+            tsMinute,
+            tsSecond
+        );
     }
 }

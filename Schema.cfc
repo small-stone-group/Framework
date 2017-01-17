@@ -350,7 +350,8 @@ component
                 index = 1;
 
                 for (rel in this.relationships) {
-                    statement &= "#tab##addForeign#CONSTRAINT `#this.table#_#mid(rel.name, 2, len(rel.name) - 2)#_ibfk` #rel.type# #rel.name#";
+                    var relColName = mid(rel.name, 2, len(rel.name) - 2);
+                    statement &= "#tab##addForeign#FOREIGN KEY #this.table#_#relColName#_ibfk(#relColName#)";
 
                     if (!arrayIsEmpty(rel.parameters)) {
                         statement &= " ";

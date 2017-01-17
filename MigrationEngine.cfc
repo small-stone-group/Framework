@@ -170,7 +170,7 @@ component
         }
 
         fileWrite(
-            '#getBaseDir()#\Database\Migrations\#dateFormat(now(), 'yyyy_mm_dd')#_#timeFormat(now(), 'HHmmss')#_#name#.cfc',
+            getBaseDir('Database\Migrations\#dateFormat(now(), 'yyyy_mm_dd')#_#timeFormat(now(), 'HHmmss')#_#name#.cfc'),
             templateContent
         );
     }

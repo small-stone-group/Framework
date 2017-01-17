@@ -1,5 +1,9 @@
 component
 {
+    this.ignore = [];
+    this.ignoreExtensions = ['.cfm', '.cfml', 'html', 'htm', 'ico'];
+    this.currentMiddleware = '';
+
     /**
      * Constructor function for the component.
      *
@@ -30,7 +34,7 @@ component
      *
      * @return any
      */
-    public any function handle()
+    public any function handle(string requestedPage = '')
     {
         if (structKeyExists(url, "controller") && structKeyExists(url, "method")) {
             var component = createObject("component", "App.Controllers.#url.controller#");
@@ -39,13 +43,18 @@ component
             return this;
         }
 
-        try {
-            if (structKeyExists(url, 'url_payload')) {
-                route().findURI(url.url_payload).perform();
-            }
-        } catch (any error) {
-            writeDump(error);
+        if (lCase(stripSlashes(cgi.script_name)) != 'index.cfm') {
+            include requestedPage;
             return this;
+        }
+
+        var payloadURI = (structKeyExists(url, 'url_payload')) ? url.url_payload : '/';
+        var r = route().findURI(payloadURI);
+
+        if (!isValid('array', r)) {
+            r.checkMiddleware().perform(r.params);
+        } else {
+            include requestedPage;
         }
 
         return this;
@@ -58,9 +67,9 @@ component
      */
     public any function get(required string uri, required string action)
     {
-        var routeURI = new App.Framework.RouteURI('get', uri, action);
+        var routeURI = new App.Framework.RouteURI('get', uri, action, this.currentMiddleware);
         arrayAppend(request.routes, routeURI);
-        return routeURI;
+        return this;
     }
 
     /**
@@ -70,9 +79,48 @@ component
      */
     public any function post(required string uri, required string action)
     {
-        var routeURI = new App.Framework.RouteURI('post', uri, action);
+        var routeURI = new App.Framework.RouteURI('post', uri, action, this.currentMiddleware);
         arrayAppend(request.routes, routeURI);
-        return routeURI;
+        return this;
+    }
+
+    /**
+     * Establishes a resource route.
+     * Also creates the file if it doesn't already exist.
+     *
+     * @return any
+     */
+    public any function resource(required string page, required string controller)
+    {
+        this.get(page, '#controller#@index');
+        this.get('#page#/create', '#controller#@create');
+        this.get('#page#/{id}', '#controller#@show');
+        this.get('#page#/{id}/edit', '#controller#@edit');
+        
+        this.post(page, '#controller#@store');
+        this.post('#page#/{id}', '#controller#@update');
+        this.post('#page#/{id}/delete', '#controller#@delete');
+
+        var controllerPath = getBaseDir('/App/Controllers/#controller#.cfc');
+
+        if (!fileExists(controllerPath)) {
+            saveContent variable = "templateContent" {
+                include "ResourceTemplate.cfm";
+            }
+
+            fileWrite(controllerPath, templateContent);
+        }
+    }
+
+    /**
+     * Constructs a middleware group.
+     *
+     * @return any
+     */
+    public any function middleware(required string name)
+    {
+        this.currentMiddleware = name;
+        return this;
     }
 
     /**
@@ -85,19 +133,67 @@ component
         var routeURI = [];
 
         for (route in request.routes) {
-            if (
-                lCase(stripSlashes(route.getURI())) == lCase(stripSlashes(uri)) &&
-                lCase(route.getType()) == lCase(cgi.request_method)
-            ) {
-                routeURI = route;
-                break;
+            if (lCase(route.getType()) == lCase(cgi.request_method)) {
+                var vars = this.extractVars(route.getURI());
+                var keys = listToArray(lCase(stripSlashes(uri)), '/');
+                var page = (arrayLen(keys) >= 1) ? keys[1] : '';
+                var params = {};
+
+                // Remove first key that indicates page
+                if (arrayLen(keys) >= 1) {
+                    arrayDeleteAt(keys, 1);
+                }
+
+                for (var v = 1; v <= arrayLen(vars); v++) {
+                    if (arrayIsDefined(keys, v)) {
+                        structInsert(params, vars[v], val(keys[v]));
+                    }
+                }
+
+                if (lCase(route.getPage()) == lCase(page)) {
+                    routeURI = route;
+                    routeURI.params = params;
+                    break;
+                }
             }
         }
 
-        if (isArray(routeURI)) {
-            throw(message = "Route directive for page '#uri#' using method #cgi.request_method# does not exist.");
+        if (
+            isArray(routeURI) &&
+            stripSlashes(uri) != '' &&
+            !arrayContains(this.ignore, uri) &&
+            !arrayContains(this.ignoreExtensions, listLast(uri, '.'))
+        ) {
+            view('layouts.index|errors.404', {
+                'title' = 'Page not found',
+                'nav' = false,
+                'message' = "Route directive for page '#uri#' using method #cgi.request_method# does not exist."
+            });
+
+            abort;
         }
 
         return routeURI;
+    }
+
+    /**
+     * Extracts variables from a URI.
+     *
+     * @return any
+     */
+    public any function extractVars(required string uri)
+    {
+        var items = listToArray(uri, '/');
+        var result = [];
+
+        for (i in items) {
+            if (startsWith(i, '{') && endsWith(i, '}')) {
+                var key = left(i, len(i) - 1);
+                key = right(key, len(key) - 1);
+                arrayAppend(result, key);
+            }
+        }
+
+        return result;
     }
 }

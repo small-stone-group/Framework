@@ -1,3 +1,3 @@
 <cfscript>
-    new App.Framework.Route().handle();
+    route().handle();
 </cfscript>

@@ -9,12 +9,23 @@ component
      *
      * @return any
      */
-    public any function init(required string type, required string uri, required string action)
+    public any function init(required string type, required string uri, required string action, string middleware = '')
     {
         variables.instance.type = type;
         variables.instance.uri = uri;
         variables.instance.action = action;
+        variables.instance.middleware = middleware;
         return this;
+    }
+
+    /**
+     * Gets the page from the URI.
+     *
+     * @return string
+     */
+    public string function getPage()
+    {
+        return listFirst(stripSlashes(variables.instance.uri), '/');
     }
 
     /**
@@ -48,17 +59,58 @@ component
     }
 
     /**
+     * Checks whether the given middleware group passes.
+     *
+     * @return any
+     */
+    public any function checkMiddleware()
+    {
+        if (variables.instance.middleware == '') {
+            return this;
+        }
+
+        var path = getBaseDir('/App/Middleware/#variables.instance.middleware#.cfc');
+
+        if (fileExists(path)) {
+            var passes = createObject('component', 'App.Middleware.#variables.instance.middleware#').init();
+
+            if (!isValid('boolean', passes)) {
+                throw("Middleware '#variables.instance.middleware#' does not return a boolean value");
+            }
+
+            if (passes) {
+                return this;
+            } else {
+                view('layouts.index|errors.401', {
+                    'title' = 'Unauthenticated',
+                    'nav' = false,
+                    'heading' = 'You are not logged in',
+                    'message' = 'You need to login to access that page.'
+                });
+
+                abort;
+            }
+        } else {
+            throw("Middleware file '#path#' does not exist");
+        }
+    }
+
+    /**
      * Performs the route action.
      *
      * @return any
      */
-    public any function perform()
+    public any function perform(struct params = {})
     {
         var action = this.getAction();
 
-        if (endsWith(action, ['.cfm', '.cfml', 'html', 'htm'])) {
+        if (endsWith(action, ['.cfm', '.cfml', 'html', 'htm', 'ico'])) {
             // Include file
             saveContent variable = "routeContent" {
+                for (p in params) {
+                    setVariable(p, params[p]);
+                }
+
                 include '../../#action#';
             }
 
@@ -69,9 +121,14 @@ component
             if (fileExists(getBaseDir('App/Controllers/#controller#.cfc'))) {
                 var component = createObject("component", "App.Controllers.#controller#");
                 var method = component.getMethod(listLast(action, '@'));
-                method();
+                method(params);
             } else {
-                writeOutput(action);
+                var viewFile = view().getFile(action);
+                if (fileExists(viewFile)) {
+                    view(action, params);
+                } else {
+                    writeOutput(action);
+                }
             }
         }
 

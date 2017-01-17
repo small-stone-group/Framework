@@ -58,4 +58,15 @@
                 expires = "#c_expires#">
         </cfif>
     </cffunction>
+
+    <cffunction name="fileToLines" access="public" returntype="array">
+        <cfargument name="filePath" required="true" type="string">
+        <cfset var lines = []>
+
+        <cfloop file="#filePath#" index="line">
+            <cfset arrayAppend(lines, line)>
+        </cfloop>
+
+        <cfreturn lines>
+    </cffunction>
 </cfcomponent>

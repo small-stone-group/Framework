@@ -79,6 +79,21 @@ component
         schema.setDatasource(variables.datasource);
         schema.setSQL(statement);
         return schema.execute().getResult();
+	}
+
+	/**
+     * Verifies the given string against an encrypted column.
+     * If verification is successful, returns true.
+     *
+     * @return boolean
+     */
+    public boolean function verify(required string column, required string str)
+    {
+        var encryptedString = variables.instance.queryBuilder
+            .select("(#variables.encryptionMethod#('#str#')) AS encryptedString")
+            .run().encryptedString;
+
+        return (toString(encryptedString) == toString(this[column]));
     }
 
     /**
@@ -171,11 +186,17 @@ component
                     loc.assignments &= ", ";
                 }
 
-                variables.instance.queryBuilder.addParams([{
+                var sqlParamData = {
                     "name" = loc.field,
                     "value" = loc.fieldValue,
                     "cfsqltype" = (loc.isFreshBinary) ? "CF_SQL_VARCHAR" : loc.fieldSQLType
-                }]);
+                };
+
+                if (loc.fieldSQLType == 'CF_SQL_DECIMAL') {
+                    structInsert(sqlParamData, 'scale', len(listLast(loc.fieldValue, '.')));
+                }
+
+                variables.instance.queryBuilder.addParams([sqlParamData]);
             }
 
             loc.update = variables.instance.queryBuilder
@@ -216,11 +237,17 @@ component
                     loc.values &= ", ";
                 }
 
-                variables.instance.queryBuilder.addParams([{
+                var sqlParamData = {
                     "name" = lCase(loc.field),
                     "value" = loc.fieldValue,
                     "cfsqltype" = (loc.isFreshBinary) ? "CF_SQL_VARCHAR" : loc.fieldSQLType
-                }]);
+                };
+
+                if (uCase(loc.fieldSQLType) == 'CF_SQL_DECIMAL') {
+                    structInsert(sqlParamData, 'scale', len(listLast('#loc.fieldValue#', '.')));
+                }
+
+                variables.instance.queryBuilder.addParams([sqlParamData]);
             }
 
             loc.createResult = variables.instance.queryBuilder
