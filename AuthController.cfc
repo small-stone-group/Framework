@@ -109,7 +109,7 @@ component extends = "Controller"
                         if (remember) {
                             // Only store cookie if remember is true
                             // Still creates a token in database
-                            cookie.cfuser = token;
+                            new App.Framework.Legacy().createTokenCookie(token);
                         }
 
                         return targetUser;

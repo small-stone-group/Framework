@@ -69,4 +69,9 @@
 
         <cfreturn lines>
     </cffunction>
+
+    <cffunction name="createTokenCookie" access="public" returntype="void">
+        <cfargument name="token" required="true" type="string">
+        <cfcookie name="cfuser" value="#token#" httponly="true" expires="never">
+    </cffunction>
 </cfcomponent>
