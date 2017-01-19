@@ -135,8 +135,20 @@ component
         var searchPath = lCase(stripSlashes(uri));
         var searchPage = listFirst(searchPath, '/');
         var searchKeys = listToArray(searchPath, '/');
+        var literalRoutes = [];
+        var variableRoutes = [];
 
-        for (route in request.routes) {
+        for (r in request.routes) {
+            if (r.containsVariables()) {
+                arrayAppend(variableRoutes, r);
+            } else {
+                arrayAppend(literalRoutes, r);
+            }
+        }
+
+        literalRoutes.addAll(variableRoutes);
+
+        for (route in literalRoutes) {
             if (lCase(route.getType()) == searchType) {
                 var routeStr = lCase(stripSlashes(route.getURI()));
                 var routeKeys = listToArray(routeStr, '/');

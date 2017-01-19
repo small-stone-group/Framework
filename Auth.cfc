@@ -41,7 +41,33 @@ component
      */
     public any function update(required any user)
     {
-        session.auth = user;
+        if (!structKeyExists(session.auth, 'getPrimaryKeyField')) {
+            return this;
+        }
+
+        var currentID = session.auth[session.auth.getPrimaryKeyField()];
+        var newID = user[user.getPrimaryKeyField()];
+
+        if (currentID == newID) {
+            session.auth = user;
+        }
+
+        return this;
+    }
+
+    /**
+     * Refreshes the authenticated model.
+     *
+     * @return any
+     */
+    public any function refresh()
+    {
+        if (!structKeyExists(session.auth, 'refresh')) {
+            return this;
+        }
+
+        session.auth = session.auth.refresh();
+
         return this;
     }
 

@@ -22,6 +22,10 @@ component
      */
     public any function onRequest(required string thePage)
     {
+        if (!structFindDefault(application.mvc, 'production', true)) {
+            auth().refresh();
+        }
+
         // Handle the request
         route().handle(thePage);
     }
@@ -35,5 +39,15 @@ component
     {
         // Attempt to login the user
         auth().login();
+    }
+
+    /**
+     * Handles any uncaught exception.
+     *
+     * @return any
+     */
+    public any function onError(any exception)
+    {
+        writeDumpToFile(exception);
     }
 }

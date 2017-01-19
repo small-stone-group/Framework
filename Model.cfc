@@ -109,19 +109,23 @@ component
     /**
      * Find the given record.
      *
-     * @param id <integer>
-     * @param column (optional) <string>
      * @return model
      */
-    public any function find(required numeric id, string column = "")
+    public any function find(required any id, string column = "")
     {
         var loc = {};
         loc.idCol = (len(arguments.column)) ? arguments.column : variables.instance.primaryKeyField;
+        loc.colType = getType(variables.columnTypes[loc.idCol]);
         loc.schema = variables.instance.queryBuilder
             .select("*")
             .from(variables.table)
-            .where("#loc.idCol# = #arguments.id#")
+            .where("#loc.idCol# = :#loc.idCol#")
             .limit(1)
+            .addParams([{
+                "name" = loc.idCol,
+                "value" = arguments.id,
+                "cfsqltype" = loc.colType
+            }])
             .run();
 
         if (loc.schema.recordcount == 1) {
@@ -133,10 +137,25 @@ component
 
             return this;
         } else {
-            throw(message = "Record #arguments.id# not found in #variables.table# using column #loc.idCol#");
+            throw(message = "Record '#arguments.id#' not found in '#variables.table#' using column '#loc.idCol#'");
         }
 
         return this;
+    }
+
+    /**
+     * Find the given record without throwing an error if not found.
+     * If not found, returns an empty struct.
+     *
+     * @return any
+     */
+    public any function findSilent(required any id, string column = "")
+    {
+        try {
+            return this.find(id, column);
+        } catch (any error) {
+            return {};
+        }
     }
 
     /**

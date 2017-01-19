@@ -59,6 +59,16 @@ component
     }
 
     /**
+     * Checks whether the URI contains variable indicators.
+     *
+     * @return boolean
+     */
+    public boolean function containsVariables()
+    {
+        return find('{', this.getURI()) == 0 || find('}', this.getURI()) == 0;
+    }
+
+    /**
      * Checks whether the given middleware group passes.
      *
      * @return any
@@ -119,9 +129,11 @@ component
             // Plain text
             var controller = listFirst(action, '@');
             if (fileExists(getBaseDir('App/Controllers/#controller#.cfc'))) {
-                var component = createObject("component", "App.Controllers.#controller#");
-                var method = component.getMethod(listLast(action, '@'));
-                method(params);
+                new App.Framework.Legacy().invokeMethod(
+                    "App.Controllers.#controller#",
+                    listLast(action, '@'),
+                    params
+                );
             } else {
                 var viewFile = view().getFile(action);
                 if (fileExists(viewFile)) {

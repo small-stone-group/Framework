@@ -74,4 +74,18 @@
         <cfargument name="token" required="true" type="string">
         <cfcookie name="cfuser" value="#token#" httponly="true" expires="never">
     </cffunction>
+
+    <cffunction name="invokeMethod" access="public" returntype="void">
+        <cfargument name="c" required="true" type="string">
+        <cfargument name="m" required="true" type="string">
+        <cfargument name="a" required="true" type="any">
+
+        <cfinvoke
+            component="#c#"
+            method="#m#">
+            <cfinvokeargument
+                name="params"
+                value="#a#">
+        </cfinvoke>
+    </cffunction>
 </cfcomponent>
