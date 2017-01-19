@@ -72,6 +72,50 @@ component extends = "Controller"
     }
 
     /**
+     * Activates the account with the given token.
+     *
+     * @return any
+     */
+    public any function activate(struct params = {})
+    {
+        var token = params.token;
+        var authModel = new App.Controllers.AuthController().model();
+        var user = authModel
+            .where('activation_token', token)
+            .take(1)
+            .get();
+
+        if (structIsEmpty(user)) {
+            return view('layouts.index|errors.500');
+        } else {
+            user.activate();
+            redirect().to('/');
+        }
+    }
+
+    /**
+     * Gets a new activation token for the given user.
+     *
+     * @return any
+     */
+    public any function getActivationToken(required any user)
+    {
+        var token = lCase(createUUID());
+
+        if (!structKeyExists(user, 'activation_token')) {
+            var table = schema(user.getTable());
+            table.string('activation_token').nullable();
+            table.update();
+        }
+
+        user = user.refresh();
+        user.activation_token = token;
+        user.save();
+
+        return token;
+    }
+
+    /**
      * Attempts to login the user using the given token.
      *
      * @return any

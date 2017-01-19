@@ -372,6 +372,10 @@ component
      */
     public string function includeContent()
     {
+        if (!structKeyExists(request, 'viewContent')) {
+            return '';
+        }
+        
         return request.viewContent;
     }
 

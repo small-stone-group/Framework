@@ -131,36 +131,69 @@ component
     public any function findURI(required string uri)
     {
         var routeURI = [];
+        var searchType = lCase(cgi.request_method);
+        var searchPath = lCase(stripSlashes(uri));
+        var searchPage = listFirst(searchPath, '/');
+        var searchKeys = listToArray(searchPath, '/');
 
         for (route in request.routes) {
-            if (lCase(route.getType()) == lCase(cgi.request_method)) {
-                var vars = this.extractVars(route.getURI());
-                var keys = listToArray(lCase(stripSlashes(uri)), '/');
-                var page = (arrayLen(keys) >= 1) ? keys[1] : '';
+            if (lCase(route.getType()) == searchType) {
+                var routeStr = lCase(stripSlashes(route.getURI()));
+                var routeKeys = listToArray(routeStr, '/');
+                var keyIndex = 1;
+                var ignore = false;
+                var keep = false;
                 var params = {};
 
-                // Remove first key that indicates page
-                if (arrayLen(keys) >= 1) {
-                    arrayDeleteAt(keys, 1);
-                }
-
-                for (var v = 1; v <= arrayLen(vars); v++) {
-                    if (arrayIsDefined(keys, v)) {
-                        structInsert(params, vars[v], val(keys[v]));
-                    }
-                }
-
-                if (lCase(route.getPage()) == lCase(page)) {
+                if (arrayIsEmpty(routeKeys) && arrayIsEmpty(searchKeys)) {
                     routeURI = route;
                     routeURI.params = params;
                     break;
+                }
+
+                if (!arrayIsEmpty(searchKeys)) {
+                    for (key in searchKeys) {
+                        if (arrayIsDefined(routeKeys, keyIndex)) {
+                            var routeSegment = routeKeys[keyIndex];
+
+                            if (startsWith(routeSegment, '{') && endsWith(routeSegment, '}')) {
+                                var rsKey = left(routeSegment, len(routeSegment) - 1);
+                                rsKey = right(rsKey, len(rsKey) - 1);
+                                structInsert(params, rsKey, key);
+                                routeURI = route;
+                                routeURI.params = params;
+                            } else {
+                                if (routeSegment == key && arrayLen(searchKeys) == arrayLen(routeKeys)) {
+                                    routeURI = route;
+                                    routeURI.params = params;
+                                    keep = true;
+                                } else {
+                                    ignore = true;
+                                    break;
+                                }
+                            }
+                        } else {
+                            ignore = true;
+                            break;
+                        }
+
+                        keyIndex++;
+                    }
+                }
+
+                if (keep) {
+                    break;
+                }
+
+                if (ignore) {
+                    continue;
                 }
             }
         }
 
         if (
             isArray(routeURI) &&
-            stripSlashes(uri) != '' &&
+            searchPath != '' &&
             !arrayContains(this.ignore, uri) &&
             !arrayContains(this.ignoreExtensions, listLast(uri, '.'))
         ) {
@@ -174,26 +207,5 @@ component
         }
 
         return routeURI;
-    }
-
-    /**
-     * Extracts variables from a URI.
-     *
-     * @return any
-     */
-    public any function extractVars(required string uri)
-    {
-        var items = listToArray(uri, '/');
-        var result = [];
-
-        for (i in items) {
-            if (startsWith(i, '{') && endsWith(i, '}')) {
-                var key = left(i, len(i) - 1);
-                key = right(key, len(key) - 1);
-                arrayAppend(result, key);
-            }
-        }
-
-        return result;
     }
 }

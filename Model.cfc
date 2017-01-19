@@ -39,6 +39,16 @@ component
     }
 
     /**
+     * Refreshes the model and returns it.
+     *
+     * @return any
+     */
+    public any function refresh()
+    {
+        return createObject("component", "App.#this.getModelName()#").init(this[this.getPrimaryKeyField()]);
+    }
+
+    /**
      * Called when a model is updated.
      *
      * @return any

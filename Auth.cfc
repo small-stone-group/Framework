@@ -23,22 +23,42 @@ component
     /**
      * Checks whether the web user is a guest (unauthenticated).
      *
+     * @return boolean
+     */
+    public boolean function guest()
+    {
+        if (!structKeyExists(session, 'auth')) {
+            return true;
+        }
+
+        return structIsEmpty(session.auth);
+    }
+
+    /**
+     * Updates the authenticated model.
+     *
      * @return any
      */
-    public any function guest()
+    public any function update(required any user)
     {
-        return structIsEmpty(session.auth);
+        session.auth = user;
+        return this;
     }
 
     /**
      * Handles user login through the auth controller.
      *
-     * @return any
+     * @return boolean
      */
-    public any function login(any targetUser = {}, boolean remember = false)
+    public boolean function login(any targetUser = {}, boolean remember = false)
     {
-        var userRecord = new App.Controllers.AuthController().tokenLogin(this.token(), targetUser, remember);
-        session.auth = userRecord;
+        try {
+            var userRecord = new App.Controllers.AuthController().tokenLogin(this.token(), targetUser, remember);
+            session.auth = userRecord;
+            return true;
+        } catch (any error) {
+            return false;
+        }
     }
 
     /**
@@ -61,6 +81,45 @@ component
 
             new App.Framework.Legacy().cookie('cfuser', '', now());
         }
+    }
+
+    /**
+     * Sends an activation email to the authenticated user.
+     *
+     * @return void
+     */
+    public void function sendActivationEmail(required any user, required string email, string subject = 'Activate your account')
+    {
+        if (structIsEmpty(user)) {
+            return;
+        }
+
+        if (!structKeyExists(application.mvc, 'mail')) {
+            throw('Cannot find mail settings in application.mvc.');
+            return;
+        }
+
+        var post = new mail();
+        var token = new App.Controllers.AuthController().getActivationToken(user);
+
+        saveContent variable = 'postContent' {
+            view('emails.activation', {
+                'user' = user,
+                'token' = token
+            });
+        }
+
+        post.setTo(email);
+        post.setFrom(application.mvc.mail.from);
+        post.setSubject(subject);
+        post.setType('html');
+        post.setAttributes(
+            server = application.mvc.mail.server,
+            username = application.mvc.mail.username,
+            password = application.mvc.mail.password
+        );
+
+        post.send(body = postContent);
     }
 
     /**
