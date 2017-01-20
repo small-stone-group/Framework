@@ -79,6 +79,39 @@ component
     }
 
     /**
+     * Called when a model is about to update.
+     * Return true for the update to continue.
+     *
+     * @return boolean
+     */
+    public boolean function onUpdate()
+    {
+        return true;
+    }
+
+    /**
+     * Called when a model is about to be created.
+     * Return true for the creation to continue.
+     *
+     * @return boolean
+     */
+    public boolean function onCreate()
+    {
+        return true;
+    }
+
+    /**
+     * Called when a model is about to be deleted.
+     * Return true for the deletion to continue.
+     *
+     * @return boolean
+     */
+    public boolean function onDelete()
+    {
+        return true;
+    }
+
+    /**
      * Run raw SQL string and return its result.
      *
      * @return any
@@ -195,6 +228,11 @@ component
 
         if (loc.exists.recordcount == 1) {
             // Update
+            if (!this.onUpdate()) {
+                throw('Model cannot be updated without authorisation.');
+                return this;
+            }
+
             loc.counter = 0;
             loc.assignments = "";
 
@@ -237,8 +275,14 @@ component
             this.onUpdated();
         } else {
             // Create
+            if (!this.onCreate()) {
+                throw('Model cannot be created without authorisation.');
+                return this;
+            }
+
             loc.counter = 0;
             loc.inserts = "";
+
             for (loc.field in loc.columns) {
                 loc.counter++;
                 loc.inserts &= loc.field;
@@ -299,6 +343,11 @@ component
      */
     public any function delete(any records)
     {
+        if (!this.onDelete()) {
+            throw('Model cannot be deleted without authorisation.');
+            return this;
+        }
+
         if (structKeyExists(arguments, 'records')) {
             if (isValid("numeric", records)) {
                 variables.instance.queryBuilder
