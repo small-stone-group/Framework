@@ -71,6 +71,16 @@ component
     }
 
     /**
+     * Returns a new email object.
+     *
+     * @return any
+     */
+    public any function email()
+    {
+        return new App.Framework.Email();
+    }
+
+    /**
      * Gets a full URL with the given path.
      *
      * @return string

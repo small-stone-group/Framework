@@ -164,6 +164,8 @@ component
                 }
 
                 if (!arrayIsEmpty(searchKeys)) {
+                    var hitCount = 0;
+
                     for (key in searchKeys) {
                         if (arrayIsDefined(routeKeys, keyIndex)) {
                             var routeSegment = routeKeys[keyIndex];
@@ -174,11 +176,14 @@ component
                                 structInsert(params, rsKey, key);
                                 routeURI = route;
                                 routeURI.params = params;
+                                hitCount++;
                             } else {
                                 if (routeSegment == key && arrayLen(searchKeys) == arrayLen(routeKeys)) {
                                     routeURI = route;
                                     routeURI.params = params;
-                                    keep = true;
+                                    keyIndex++;
+                                    hitCount++;
+                                    continue;
                                 } else {
                                     ignore = true;
                                     break;
@@ -190,6 +195,10 @@ component
                         }
 
                         keyIndex++;
+                    }
+
+                    if (hitCount == arrayLen(searchKeys)) {
+                        keep = true;
                     }
                 }
 
