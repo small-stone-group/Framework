@@ -88,7 +88,7 @@ component extends = "Controller"
         if (structIsEmpty(user)) {
             return view('layouts.index|errors.500');
         } else {
-            user.activate();
+            user.skipAuth().activate();
             redirect().to('/');
         }
     }
@@ -110,6 +110,7 @@ component extends = "Controller"
 
         user = user.refresh();
         user.activation_token = token;
+        user.skipAuth();
         user.save();
 
         return token;
@@ -148,6 +149,7 @@ component extends = "Controller"
                         // Create new token and link to user
                         var newToken = new App.Framework.Token().save({'token' = token});
                         targetUser.remember_token = newToken.id;
+                        targetUser.skipAuth();
                         targetUser.save();
 
                         if (remember) {

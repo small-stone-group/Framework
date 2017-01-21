@@ -82,6 +82,16 @@ component
     }
 
     /**
+     * Gets a full data directory URL with the given path.
+     *
+     * @return string
+     */
+    public string function getDataUrl(string uri = '')
+    {
+        return getUrl('data/#stripSlashes(uri)#');
+    }
+
+    /**
      * Gets the datasource.
      *
      * @return string

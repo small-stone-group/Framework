@@ -10,6 +10,7 @@ component
     variables.instance.hasSelect = false;
     variables.instance.queryBuilder = new App.Framework.QueryBuilder();
     variables.instance.takingSingular = false;
+    variables.instance.skipAuth = false;
 
     /**
      * Constructor function for the component.
@@ -109,6 +110,17 @@ component
     public boolean function onDelete()
     {
         return true;
+    }
+
+    /**
+     * Skips the authorisation check.
+     *
+     * @return any
+     */
+    public any function skipAuth()
+    {
+        variables.instance.skipAuth = true;
+        return this;
     }
 
     /**
@@ -228,7 +240,7 @@ component
 
         if (loc.exists.recordcount == 1) {
             // Update
-            if (!this.onUpdate()) {
+            if (!this.onUpdate() && !variables.instance.skipAuth) {
                 throw('Model cannot be updated without authorisation.');
                 return this;
             }
@@ -275,7 +287,7 @@ component
             this.onUpdated();
         } else {
             // Create
-            if (!this.onCreate()) {
+            if (!this.onCreate() && !variables.instance.skipAuth) {
                 throw('Model cannot be created without authorisation.');
                 return this;
             }
@@ -343,7 +355,7 @@ component
      */
     public any function delete(any records)
     {
-        if (!this.onDelete()) {
+        if (!this.onDelete() && !variables.instance.skipAuth) {
             throw('Model cannot be deleted without authorisation.');
             return this;
         }
