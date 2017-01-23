@@ -7,8 +7,8 @@ component
      */
     public any function init(string file = '')
     {
-        if (file != '' && fileExists(file)) {
-            this.file = file;
+        if (file != '' && fileExists(getDataDir(file))) {
+            this.file = getDataDir(file);
         }
 
         return this;
@@ -91,8 +91,17 @@ component
             // Use dynamic size
         }
 
-        var cutoff = len(getDataDir());
-        var uri = stripSlashes(mid(this.file, cutoff, len(this.file) - cutoff));
+        var uri = stripSlashes(mid(this.file, len(getDataDir()), 1000));
         return getUrl('/data/#uri#');
+    }
+
+    /**
+     * Gets the relative data path of the file.
+     *
+     * @return string
+     */
+    public string function relativePath()
+    {
+        return stripSlashes(mid(this.file, len(getDataDir()), 1000));
     }
 }

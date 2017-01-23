@@ -98,7 +98,7 @@ component
     public string function getUrl(string uri = '')
     {
         var https = (cgi.https == 'off') ? 'http' : 'https';
-        return '#https#://#cgi.server_name#/#stripSlashes(uri)#';
+        return replace('#https#://#cgi.server_name#/#stripSlashes(uri)#', '\', '/', 'all');
     }
 
     /**
