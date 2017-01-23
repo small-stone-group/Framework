@@ -81,6 +81,16 @@ component
     }
 
     /**
+     * Returns a new media object.
+     *
+     * @return any
+     */
+    public any function media(string file = '')
+    {
+        return new App.Framework.Media(file);
+    }
+
+    /**
      * Gets a full URL with the given path.
      *
      * @return string
@@ -504,5 +514,39 @@ component
             tsMinute,
             tsSecond
         );
+    }
+
+    /**
+     * Gets the given environment variable or the given default value if it doesn't exist.
+     *
+     * @return any
+     */
+    public any function env(required string key, string notFound = '')
+    {
+        if (find('.', key) != 0) {
+            var keys = listToArray(key, '.');
+            var last = keys[arrayLen(keys)];
+            var parent = application;
+
+            arrayDeleteAt(keys, arrayLen(keys));
+
+            for (k in keys) {
+                if (structKeyExists(parent, k)) {
+                    if (isValid('struct', parent[k])) {
+                        parent = parent[k];
+                        continue;
+                    } else {
+                        throw("Key '#k#' is not a struct.");
+                    }
+                } else {
+                    throw("Key '#k#' does not exist in 'application'.");
+                    break;
+                }
+            }
+
+            return structFindDefault(parent, last, notFound);
+        }
+
+        return structFindDefault(application, key, notFound);
     }
 }
