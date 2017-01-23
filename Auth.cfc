@@ -7,6 +7,10 @@ component
      */
     public any function init()
     {
+        if (!structKeyExists(session, 'auth')) {
+            session.auth = {};
+        }
+
         return this;
     }
 
@@ -62,6 +66,10 @@ component
      */
     public any function refresh()
     {
+        if (!structKeyExists(session, 'auth')) {
+            return this;
+        }
+
         if (!structKeyExists(session.auth, 'refresh')) {
             return this;
         }
