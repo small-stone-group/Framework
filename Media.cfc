@@ -74,8 +74,40 @@ component
      */
     public string function name()
     {
-        var file = listLast(this.file, '/');
+        var file = listLast(replace(this.file, '\', '/', 'all'), '/');
         return listFirst(file, '.');
+    }
+
+    /**
+     * Gets the file's extension.
+     *
+     * @return string
+     */
+    public string function extension()
+    {
+        return listLast(this.file, '.');
+    }
+
+    /**
+     * Gets the directory path.
+     *
+     * @return string
+     */
+    public string function directory()
+    {
+        var items = listToArray(replace(this.file, '\', '/', 'all'), '/');
+        arrayDeleteAt(items, arrayLen(items));
+        return stripSlashes(arrayToList(items, '/'));
+    }
+
+    /**
+     * Gets the relative directory path.
+     *
+     * @return string
+     */
+    public string function relativeDirectory()
+    {
+        return stripSlashes(mid(this.directory(), len(getDataDir()), 1000));
     }
 
     /**
@@ -83,16 +115,26 @@ component
      *
      * @return string
      */
-    public string function url(any size = '')
+    public string function url(any size = 0)
     {
-        if (isValid('string', size) && size != '') {
+        if (!isNumeric(size) && isValid('string', size) && len(size)) {
             // Get size from environment
-        } else if (isValid('numeric', size) && size > 0) {
-            // Use dynamic size
+            size = env('media.#size#', 256);
         }
 
-        var uri = stripSlashes(mid(this.file, len(getDataDir()), 1000));
-        return getUrl('/data/#uri#');
+        if (size > 0) {
+            var path = '#this.relativeDirectory()#/#size#-#this.name()#.#this.extension()#';
+
+            if (fileExists(getDataDir(path))) {
+                return getUrl('/data/#stripSlashes(path)#');
+            } else {
+                this.resize(size);
+                return this.url(size);
+            }
+        }
+
+        var uri = mid(this.file, len(getDataDir()), 1000);
+        return getUrl('/data/#stripSlashes(uri)#');
     }
 
     /**
@@ -103,5 +145,61 @@ component
     public string function relativePath()
     {
         return stripSlashes(mid(this.file, len(getDataDir()), 1000));
+    }
+
+    /**
+     * Resizes the image.
+     *
+     * @return any
+     */
+    public any function resize(required numeric width, numeric height = -1)
+    {
+        if (height == -1) {
+            this.resizeSquare(width);
+        } else {
+            var dest = '#this.relativeDirectory()#/#width#-#this.name()#.#this.extension()#';
+            var image = imageRead(this.file);
+            imageResize(image, width, height);
+            imageWrite(image, getDataDir(dest), 1);
+        }
+
+        return this;
+    }
+
+    /**
+     * Resizes the image to a square.
+     *
+     * @return any
+     */
+    public any function resizeSquare(required numeric size)
+    {
+        var image = imageRead(this.file);
+        var info = imageInfo(image);
+        var dest = '#this.relativeDirectory()#/#size#-#this.name()#.#this.extension()#';
+
+        if (info.width < size || info.height < size) {
+            if (info.width >= info.height) {
+                imageResize(image, "", size, 'mediumPerformance');
+            } else {
+                imageResize(image, size, "", 'mediumPerformance');
+            }
+        } else {
+            if (info.height >= info.width) {
+                imageScaleToFit(image, size, "", 'mediumPerformance');
+            } else {
+                imageScaleToFit(image, "", size, 'mediumPerformance');
+            }
+        }
+        
+        info = imageInfo(image);
+        
+        if (info.height >= size) {
+            imageCrop(image, 0, ((info.height / 2) - (size / 2)), size, size);
+        } else {
+            imageCrop(image, ((info.width / 2) - (size / 2)), 0, size, size);
+        }
+        
+        imageWrite(image, getDataDir(dest), 0.75);
+        return this;
     }
 }

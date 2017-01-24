@@ -1,9 +1,9 @@
 component
 {
-    variables.from = application.mvc.mail.from;
-    variables.server = application.mvc.mail.server;
-    variables.username = application.mvc.mail.username;
-    variables.password = application.mvc.mail.password;
+    variables.from = application.mail.from;
+    variables.server = application.mail.server;
+    variables.username = application.mail.username;
+    variables.password = application.mail.password;
 
     variables.instance.subject = '';
     variables.instance.recipient = '';

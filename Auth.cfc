@@ -128,8 +128,8 @@ component
             return;
         }
 
-        if (!structKeyExists(application.mvc, 'mail')) {
-            throw('Cannot find mail settings in application.mvc.');
+        if (!structKeyExists(application, 'mail')) {
+            throw('Cannot find mail settings in application.');
             return;
         }
 
@@ -144,13 +144,13 @@ component
         }
 
         post.setTo(email);
-        post.setFrom(application.mvc.mail.from);
+        post.setFrom(application.mail.from);
         post.setSubject(subject);
         post.setType('html');
         post.setAttributes(
-            server = application.mvc.mail.server,
-            username = application.mvc.mail.username,
-            password = application.mvc.mail.password
+            server = application.mail.server,
+            username = application.mail.username,
+            password = application.mail.password
         );
 
         post.send(body = postContent);
