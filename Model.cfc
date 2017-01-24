@@ -465,14 +465,32 @@ component
         string orderByType = ""
     )
     {
-        var result = [];
-        var links = this.hasMany(modelFirst, columnFirstStart, columnFirstEnd, orderByColumn, orderByType);
+        var firstModel = createObject("component", "App.#modelFirst#").init();
+        var lastModel = createObject("component", "App.#modelLast#").init();
 
-        for (link in links) {
-            arrayAppend(result, link.hasOne(modelLast, columnLastStart, columnLastEnd));
+        variables.instance.queryBuilder
+            .select('#lastModel.getTable()#.*')
+            .from('#this.getTable()#, #firstModel.getTable()#, #lastModel.getTable()#')
+
+            .where('#this.getTable()#.#columnFirstStart# = :#this.getTable()#.#columnFirstStart#')
+            .andWhere('#this.getTable()#.#columnFirstStart# = #firstModel.getTable()#.#columnFirstEnd#')
+            .addParams([{
+                "name" = '#this.getTable()#.#columnFirstStart#',
+                "value" = this[columnFirstStart],
+                "cfsqltype" = getType(variables.columnTypes[columnFirstStart])
+            }])
+
+            .andWhere('#firstModel.getTable()#.#columnLastStart# = #lastModel.getTable()#.#columnLastEnd#');
+
+        if (len(orderByColumn)) {
+            variables.instance.queryBuilder
+                .orderBy(orderByColumn, orderByType);
         }
 
-        return result;
+        return queryToModels(
+            variables.instance.queryBuilder.run(),
+            modelLast
+        );
     }
 
     /**

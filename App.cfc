@@ -27,6 +27,8 @@ component
     {
         // Add the web routes
         new web();
+
+        request.start = getTickCount();
     }
 
     /**
@@ -44,6 +46,17 @@ component
 
         // Handle the request
         route().handle(thePage);
+    }
+
+    /**
+     * Handles the end of a request.
+     *
+     * @return void
+     */
+    public void function onRequestEnd()
+    {
+        request.end = getTickCount();
+        request.duration = request.end - request.start;
     }
 
     /**

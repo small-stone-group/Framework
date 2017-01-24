@@ -89,6 +89,30 @@ component
     }
 
     /**
+     * Gets the full name of the file including the extension.
+     *
+     * @return string
+     */
+    public string function fullname()
+    {
+        return '#this.name()#.#this.extension()#';
+    }
+
+    /**
+     * Gets the resized name of the file.
+     *
+     * @return any
+     */
+    public any function resizedName(required any size)
+    {
+        if (isArray(size)) {
+            return '#arrayToList(size, "_")#-#this.fullname()#';
+        } else {
+            return '#size#-#this.fullname()#';
+        }
+    }
+
+    /**
      * Gets the directory path.
      *
      * @return string
@@ -111,6 +135,16 @@ component
     }
 
     /**
+     * Gets the path to the file with the given size.
+     *
+     * @return any
+     */
+    public any function resizedPath(required any size)
+    {
+        return '#this.relativeDirectory()#/#this.resizedName(size)#';
+    }
+
+    /**
      * Gets the URL of the file.
      *
      * @return string
@@ -123,7 +157,7 @@ component
         }
 
         if (size > 0) {
-            var path = '#this.relativeDirectory()#/#size#-#this.name()#.#this.extension()#';
+            var path = this.resizedPath(size);
 
             if (fileExists(getDataDir(path))) {
                 return getUrl('/data/#stripSlashes(path)#');
@@ -157,9 +191,9 @@ component
         if (height == -1) {
             this.resizeSquare(width);
         } else {
-            var dest = '#this.relativeDirectory()#/#width#-#this.name()#.#this.extension()#';
+            var dest = this.resizedPath([width, height]);
             var image = imageRead(this.file);
-            imageResize(image, width, height);
+            imageScaleToFit(image, width, height, 'mediumPerformance');
             imageWrite(image, getDataDir(dest), 1);
         }
 
@@ -175,7 +209,7 @@ component
     {
         var image = imageRead(this.file);
         var info = imageInfo(image);
-        var dest = '#this.relativeDirectory()#/#size#-#this.name()#.#this.extension()#';
+        var dest = this.resizedPath(size);
 
         if (info.width < size || info.height < size) {
             if (info.width >= info.height) {
@@ -190,16 +224,46 @@ component
                 imageScaleToFit(image, "", size, 'mediumPerformance');
             }
         }
-        
+
         info = imageInfo(image);
-        
+
         if (info.height >= size) {
             imageCrop(image, 0, ((info.height / 2) - (size / 2)), size, size);
         } else {
             imageCrop(image, ((info.width / 2) - (size / 2)), 0, size, size);
         }
-        
+
         imageWrite(image, getDataDir(dest), 0.75);
+        return this;
+    }
+
+    /**
+     * Copies the file to the given relative directory.
+     * Returns a new media object of the new file.
+     *
+     * @return any
+     */
+    public any function copy(required string destination)
+    {
+        fileCopy(
+            this.file,
+            getDataDir(destination, true)
+        );
+
+        return media('#stripSlashes(destination)#/#this.fullname()#');
+    }
+
+    /**
+     * Deletes the source file, but not its resized counterparts.
+     *
+     * @return any
+     */
+    public any function deleteSource()
+    {
+        if (fileExists(this.file)) {
+            fileDelete(this.file);
+        }
+
         return this;
     }
 }
