@@ -110,7 +110,7 @@ component
      *
      * @return any
      */
-    public any function perform(struct params = {})
+    public any function perform(struct params = {}, array orders = [])
     {
         var action = this.getAction();
 
@@ -132,7 +132,8 @@ component
                 new App.Framework.Legacy().invokeMethod(
                     "App.Controllers.#controller#",
                     listLast(action, '@'),
-                    params
+                    params,
+                    orders
                 );
             } else {
                 var viewFile = view().getFile(action);

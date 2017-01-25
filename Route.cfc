@@ -52,7 +52,7 @@ component
         var r = route().findURI(payloadURI);
 
         if (!isValid('array', r)) {
-            r.checkMiddleware().perform(r.params);
+            r.checkMiddleware().perform(r.params, r.paramOrders);
         } else {
             include requestedPage;
         }
@@ -156,10 +156,12 @@ component
                 var ignore = false;
                 var keep = false;
                 var params = {};
+                var paramOrders = [];
 
                 if (arrayIsEmpty(routeKeys) && arrayIsEmpty(searchKeys)) {
                     routeURI = route;
                     routeURI.params = params;
+                    routeURI.paramOrders = paramOrders;
                     break;
                 }
 
@@ -174,13 +176,16 @@ component
                                 var rsKey = left(routeSegment, len(routeSegment) - 1);
                                 rsKey = right(rsKey, len(rsKey) - 1);
                                 structInsert(params, rsKey, key);
+                                arrayAppend(paramOrders, rsKey);
                                 routeURI = route;
                                 routeURI.params = params;
+                                routeURI.paramOrders = paramOrders;
                                 hitCount++;
                             } else {
                                 if (routeSegment == key && arrayLen(searchKeys) == arrayLen(routeKeys)) {
                                     routeURI = route;
                                     routeURI.params = params;
+                                    routeURI.paramOrders = paramOrders;
                                     keyIndex++;
                                     hitCount++;
                                     continue;

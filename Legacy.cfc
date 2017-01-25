@@ -78,14 +78,21 @@
     <cffunction name="invokeMethod" access="public" returntype="void">
         <cfargument name="c" required="true" type="string">
         <cfargument name="m" required="true" type="string">
-        <cfargument name="a" required="true" type="any">
+        <cfargument name="a" required="true" type="struct">
+        <cfargument name="o" required="false" type="array" default="[]">
+
+        <cfset var oi = 0>
 
         <cfinvoke
             component="#c#"
             method="#m#">
-            <cfinvokeargument
-                name="params"
-                value="#a#">
+
+            <cfloop array="#o#" index="oi">
+                <cfinvokeargument
+                    name="#oi#"
+                    value="#a[oi]#">
+                </cfinvokeargument>
+            </cfloop>
         </cfinvoke>
     </cffunction>
 </cfcomponent>
