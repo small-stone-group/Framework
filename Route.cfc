@@ -65,9 +65,9 @@ component
      *
      * @return any
      */
-    public any function get(required string uri, required string action)
+    public any function get(required string uri, required string action, struct args = {})
     {
-        var routeURI = new App.Framework.RouteURI('get', uri, action, this.currentMiddleware);
+        var routeURI = new App.Framework.RouteURI('get', uri, action, this.currentMiddleware, args);
         arrayAppend(request.routes, routeURI);
         return this;
     }
@@ -223,9 +223,8 @@ component
             !arrayContains(this.ignore, uri) &&
             !arrayContains(this.ignoreExtensions, listLast(uri, '.'))
         ) {
-            view('layouts.index|errors.404', {
+            view('layouts.error|errors.404', {
                 'title' = 'Page not found',
-                'nav' = false,
                 'message' = "Route directive for page '#uri#' using method #cgi.request_method# does not exist."
             });
 

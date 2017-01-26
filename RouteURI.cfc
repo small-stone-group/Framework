@@ -3,18 +3,21 @@ component
     variables.instance.type = "";
     variables.instance.uri = "";
     variables.instance.action = "";
+    variables.instance.middleware = "";
+    variables.instance.args = {};
 
     /**
      * Constructor function for the component.
      *
      * @return any
      */
-    public any function init(required string type, required string uri, required string action, string middleware = '')
+    public any function init(required string type, required string uri, required string action, string middleware = '', struct args = {})
     {
         variables.instance.type = type;
         variables.instance.uri = uri;
         variables.instance.action = action;
         variables.instance.middleware = middleware;
+        variables.instance.args = args;
         return this;
     }
 
@@ -114,6 +117,14 @@ component
     {
         var action = this.getAction();
 
+        if (!structIsEmpty(variables.instance.args)) {
+            params = {
+                'args' = variables.instance.args
+            };
+
+            orders = ['args'];
+        }
+
         if (endsWith(action, ['.cfm', '.cfml', 'html', 'htm', 'ico'])) {
             // Include file
             saveContent variable = "routeContent" {
@@ -128,6 +139,7 @@ component
         } else {
             // Plain text
             var controller = listFirst(action, '@');
+
             if (fileExists(getBaseDir('App/Controllers/#controller#.cfc'))) {
                 new App.Framework.Legacy().invokeMethod(
                     "App.Controllers.#controller#",
@@ -137,6 +149,7 @@ component
                 );
             } else {
                 var viewFile = view().getFile(action);
+
                 if (fileExists(viewFile)) {
                     view(action, params);
                 } else {
