@@ -80,36 +80,66 @@ component
     }
 
     /**
-     * Called when a model is about to update.
+     * Checks whether the model can be updated.
      * Return true for the update to continue.
      *
      * @return boolean
      */
-    public boolean function onUpdate()
+    public boolean function canUpdate()
     {
         return true;
     }
 
     /**
-     * Called when a model is about to be created.
+     * Checks whether the model can be created.
      * Return true for the creation to continue.
      *
      * @return boolean
      */
-    public boolean function onCreate()
+    public boolean function canCreate()
     {
         return true;
     }
 
     /**
-     * Called when a model is about to be deleted.
+     * Checks whether the model can be deleted.
      * Return true for the deletion to continue.
      *
      * @return boolean
      */
-    public boolean function onDelete()
+    public boolean function canDelete()
     {
         return true;
+    }
+
+    /**
+     * Called when a model is about to update.
+     *
+     * @return any
+     */
+    public any function onUpdate()
+    {
+        return this;
+    }
+
+    /**
+     * Called when a model is about to be created.
+     *
+     * @return any
+     */
+    public any function onCreate()
+    {
+        return this;
+    }
+
+    /**
+     * Called when a model is about to be deleted.
+     *
+     * @return any
+     */
+    public any function onDelete()
+    {
+        return this;
     }
 
     /**
@@ -240,10 +270,12 @@ component
 
         if (loc.exists.recordcount == 1) {
             // Update
-            if (!this.onUpdate() && !variables.instance.skipAuth) {
+            if (!this.canUpdate() && !variables.instance.skipAuth) {
                 throw('Model cannot be updated without authorisation.');
                 return this;
             }
+
+            this.onUpdate();
 
             loc.counter = 0;
             loc.assignments = "";
@@ -287,10 +319,12 @@ component
             this.onUpdated();
         } else {
             // Create
-            if (!this.onCreate() && !variables.instance.skipAuth) {
+            if (!this.canCreate() && !variables.instance.skipAuth) {
                 throw('Model cannot be created without authorisation.');
                 return this;
             }
+
+            this.onCreate();
 
             loc.counter = 0;
             loc.inserts = "";
@@ -355,10 +389,12 @@ component
      */
     public any function delete(any records)
     {
-        if (!this.onDelete() && !variables.instance.skipAuth) {
+        if (!this.canDelete() && !variables.instance.skipAuth) {
             throw('Model cannot be deleted without authorisation.');
             return this;
         }
+
+        this.onDelete();
 
         if (structKeyExists(arguments, 'records')) {
             if (isValid("numeric", records)) {

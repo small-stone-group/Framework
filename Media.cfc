@@ -145,6 +145,29 @@ component
     }
 
     /**
+     * Gets the relative public directory of the given source file.
+     *
+     * @return string
+     */
+    public string function publicDirectory()
+    {
+        var path = convertChars(this.relativeDirectory(), '\', '/');
+        return stripSlashes(stripIndex(path, 1, '/'));
+    }
+
+    /**
+     * Checks whether the given file is the source file.
+     * Source files exist in /data/secure.
+     *
+     * @return boolean
+     */
+    public boolean function isSource()
+    {
+        var path = convertChars(this.relativeDirectory(), '\', '/');
+        return lCase(listFirst(path, '/')) == 'secure';
+    }
+
+    /**
      * Gets the URL of the file.
      *
      * @return string
@@ -157,6 +180,19 @@ component
         }
 
         if (size > 0) {
+            if (this.isSource()) {
+                var path = '#this.publicDirectory()#/#this.resizedName(size)#';
+
+                if (fileExists(getDataDir(path))) {
+                    return getUrl('/data/#stripSlashes(path)#');
+                } else {
+                    var file = this.copy(this.publicDirectory());
+                    file.resize(size);
+                    file.deleteSource();
+                    return file.url(size);
+                }
+            }
+
             var path = this.resizedPath(size);
 
             if (fileExists(getDataDir(path))) {
@@ -245,6 +281,12 @@ component
      */
     public any function copy(required string destination)
     {
+        var destPath = '#stripSlashes(destination)#/#this.fullname()#';
+
+        if (fileExists(getDataDir(destPath))) {
+            return media(destPath);
+        }
+
         fileCopy(
             this.file,
             getDataDir(destination, true)

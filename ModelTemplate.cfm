@@ -9,7 +9,7 @@ component extends = "Framework.Model"
      *
      * @return boolean
      */
-    public boolean function onUpdate()
+    public boolean function canUpdate()
     {
         return true;
     }
@@ -20,7 +20,7 @@ component extends = "Framework.Model"
      *
      * @return boolean
      */
-    public boolean function onDelete()
+    public boolean function canDelete()
     {
         return true;
     }

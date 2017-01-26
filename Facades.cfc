@@ -306,6 +306,28 @@ component
     }
 
     /**
+     * Strips the given string by index of the given delimiter.
+     *
+     * @return string
+     */
+    public string function stripIndex(required string str, required numeric index, required string delimiter)
+    {
+        var list = listToArray(str, delimiter);
+        arrayDeleteAt(list, index);
+        return arrayToList(list, delimiter);
+    }
+
+    /**
+     * Converts the given characters in the whole string.
+     *
+     * @return string
+     */
+    public string function convertChars(required string search, required string needle, required string replacement)
+    {
+        return replace(search, needle, replacement, 'all');
+    }
+
+    /**
      * Joins a time object to a date object.
      *
      * @return any

@@ -57,7 +57,7 @@ component extends = "Controller"
     {
         var table = schema(this.model().getTable());
         table.integer('remember_token').nullable();
-        table.foreign('remember_token').references('remember_tokens', 'id').onDelete('set null');
+        table.foreign('remember_token').references('remember_tokens', 'id').canDelete('set null');
         table.update();
     }
 
