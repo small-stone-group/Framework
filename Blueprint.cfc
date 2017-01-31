@@ -113,7 +113,7 @@ component
      *
      * @return any
      */
-    public any function canDelete(required string action)
+    public any function onDelete(required string action)
     {
         return this.addParam("ON DELETE #uCase(action)#");
     }
@@ -123,7 +123,7 @@ component
      *
      * @return any
      */
-    public any function canUpdate(required string action)
+    public any function onUpdate(required string action)
     {
         return this.addParam("ON UPDATE #uCase(action)#");
     }

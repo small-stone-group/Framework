@@ -422,7 +422,7 @@ component
      *
      * @return string
      */
-    public string function includeContent()
+    public string function includeViewContent()
     {
         if (!structKeyExists(request, 'viewContent')) {
             return '';
@@ -570,5 +570,35 @@ component
         }
 
         return structFindDefault(application, key, notFound);
+    }
+
+    /**
+     * Includes the given content file.
+     *
+     * @return string
+     */
+    public string function includeContent(required string name)
+    {
+        var paths = [];
+
+        if (findNoCase(".", name) > 0) {
+            paths = listToArray(name, ".");
+        } else if (findNoCase("/", name) > 0) {
+            paths = listToArray(name, "/");
+        } else if (findNoCase("\", name) > 0) {
+            paths = listToArray(name, "\");
+        } else {
+            paths = [name];
+        }
+
+        var path = getBaseDir("Content/#arrayToList(paths, '/')#.html");
+
+        if (!fileExists(path)) {
+            throw("Content file '#arrayToList(paths, ""/"")#' does not exist.");
+            return '';
+        }
+
+        var content = fileRead(path);
+        return content;
     }
 }

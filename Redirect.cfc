@@ -23,4 +23,16 @@ component
     {
         location(session.redirect.previous, false);
     }
+
+    /**
+     * Makes a post request to the given URL with the given form data.
+     * Expects response content to be JSON.
+     * Returns a deserialized structure of the JSON.
+     *
+     * @return any
+     */
+    public any function post(required string path, struct data = {})
+    {
+        return deserializeJSON(new App.Framework.Legacy().httpRequest(path, 'post', data).fileContent);
+    }
 }

@@ -95,4 +95,20 @@
             </cfloop>
         </cfinvoke>
     </cffunction>
+
+    <cffunction name="httpRequest" access="public" returntype="any">
+        <cfargument name="fullurl" required="true" type="string">
+        <cfargument name="method" required="true" type="string">
+        <cfargument name="formdata" required="true" type="struct">
+
+        <cfset var httpResponse = "">
+
+        <cfhttp url="#fullurl#" method="#method#" result="httpResponse" timeout="60">
+            <cfloop collection="#formdata#" item="key">
+                <cfhttpparam type="formfield" name="#key#" value="#structFind(formdata, key)#">
+            </cfloop>
+        </cfhttp>
+
+        <cfreturn httpResponse>
+    </cffunction>
 </cfcomponent>

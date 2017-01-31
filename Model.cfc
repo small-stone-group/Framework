@@ -1048,6 +1048,7 @@ component
             case "int": return "CF_SQL_INTEGER"; break;
             case "bigint": return "CF_SQL_BIGINT"; break;
             case "tinyint": return "CF_SQL_TINYINT"; break;
+            case "tinyint unsigned": return "CF_SQL_TINYINT"; break;
             case "int unsigned": return "CF_SQL_INTEGER"; break;
             case "timestamp": return "CF_SQL_TIMESTAMP"; break;
             case "date": return "CF_SQL_DATE"; break;
