@@ -601,4 +601,14 @@ component
         var content = fileRead(path);
         return content;
     }
+
+    /**
+     * Shorthand if-else statement.
+     *
+     * @return string
+     */
+    public string function cond(required bool condition, required string passes, string fails = '')
+    {
+        return (condition) ? passes : fails;
+    }
 }
