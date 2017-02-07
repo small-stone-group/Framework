@@ -58,12 +58,6 @@ component
     {
         request.end = getTickCount();
         request.duration = request.end - request.start;
-
-        // Write debug info if not in production environment
-        if (!structFindDefault(application.mvc, 'production', true)) {
-            writeOutput('<div class="container pt-5 pb-5 text-muted">Execution Time: #request.duration#ms</div>');
-        }
-
         session.redirect.previous = structFindDefault(session.redirect, 'current', getUrl());
     }
 
