@@ -2,7 +2,6 @@ component
 {
     variables.datasource = getDatasource();
     variables.table = "tblModel";
-    variables.encryptionMethod = "DES_ENCRYPT";
     variables.meta = getMetaData(this);
     variables.ignoreDefaults = ["CURRENT_TIMESTAMP"];
     variables.columns = [];
@@ -166,6 +165,18 @@ component
         return schema.execute().getResult();
 	}
 
+    /**
+     * Gets the irreversible hash function (SHA-256).
+     *
+     * @return string
+     */
+    public string function hashString(required string str, string salt = env('encryption.salt'))
+    {
+        return variables.instance.queryBuilder
+            .select("(SELECT SHA2(CONCAT('#str#', '#salt#'), 256)) AS hash")
+            .run().hash;
+    }
+
 	/**
      * Verifies the given string against an encrypted column.
      * If verification is successful, returns true.
@@ -174,11 +185,9 @@ component
      */
     public boolean function verify(required string column, required string str)
     {
-        var encryptedString = variables.instance.queryBuilder
-            .select("(#variables.encryptionMethod#('#str#')) AS encryptedString")
-            .run().encryptedString;
-
-        return (toString(encryptedString) == toString(this[column]));
+        var encryptedString = this.hashString(str);
+        var colToTest = structFind(this, column);
+        return (toString(encryptedString) == toString(colToTest));
     }
 
     /**
@@ -285,10 +294,15 @@ component
 
                 loc.fieldValue = structFind(this, loc.field);
                 loc.fieldSQLType = getType(variables.columnTypes[loc.field]);
-                loc.isFreshBinary = loc.fieldSQLType == "CF_SQL_VARBINARY" && isValid("string", loc.fieldValue);
+                loc.isFreshBinary = uCase(loc.fieldSQLType) == "CF_SQL_VARBINARY" && isValid("string", loc.fieldValue);
 
                 if (loc.isFreshBinary) {
-                    loc.assignments &= "#loc.field# = #variables.encryptionMethod#(:#loc.field#)";
+                    loc.assignments &= "#loc.field# = SHA2(CONCAT(:#loc.field#, :#loc.field#_saltkey), 256)";
+                    variables.instance.queryBuilder.addParams([{
+                        "name" = '#loc.field#_saltkey',
+                        "value" = env('encryption.salt'),
+                        "cfsqltype" = "CF_SQL_VARCHAR"
+                    }]);
                 } else {
                     loc.assignments &= "#loc.field# = :#loc.field#";
                 }
@@ -347,7 +361,12 @@ component
                 loc.isFreshBinary = loc.fieldSQLType == "CF_SQL_VARBINARY" && isValid("string", loc.fieldValue);
 
                 if (loc.isFreshBinary) {
-                    loc.values &= "#variables.encryptionMethod#(:#lCase(loc.field)#)";
+                    loc.values &= "SHA2(CONCAT(:#lCase(loc.field)#, :#loc.field#_saltkey), 256)";
+                    variables.instance.queryBuilder.addParams([{
+                        "name" = '#loc.field#_saltkey',
+                        "value" = env('encryption.salt'),
+                        "cfsqltype" = "CF_SQL_VARCHAR"
+                    }]);
                 } else {
                     loc.values &= ":#lCase(loc.field)#";
                 }
@@ -1015,7 +1034,7 @@ component
 
             if (
                 arrayContains(variables.nullColumns, column) &&
-                !arrayContains(['varchar', 'longtext', 'enum'], variables.columnTypes[column]) &&
+                !arrayContains(['varchar', 'longtext', 'enum', 'varbinary'], variables.columnTypes[column]) &&
                 !isValid('numeric', value) && isValid('string', value)
             ) {
                 arrayDelete(columns, column);

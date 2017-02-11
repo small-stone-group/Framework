@@ -135,29 +135,33 @@ component
 
     public any function run(boolean getResult = true)
     {
-        var statement = this.compile();
-        var schema = new Query();
+        try {
+            var statement = this.compile();
+            var schema = new Query();
 
-        // Clear queries ready for next
-        this.queries = [];
+            // Clear queries ready for next
+            this.queries = [];
 
-        schema.setDatasource(this.datasource);
-        schema.setSQL(statement);
+            schema.setDatasource(this.datasource);
+            schema.setSQL(statement);
 
-        for (param in this.params) {
-            if (structKeyExists(param, 'scale')) {
-                schema.addParam(name = param.name, value = param.value, cfsqltype = param.cfsqltype, scale = param.scale);
-            } else {
-                schema.addParam(name = param.name, value = param.value, cfsqltype = param.cfsqltype);
+            for (param in this.params) {
+                if (structKeyExists(param, 'scale')) {
+                    schema.addParam(name = param.name, value = param.value, cfsqltype = param.cfsqltype, scale = param.scale);
+                } else {
+                    schema.addParam(name = param.name, value = param.value, cfsqltype = param.cfsqltype);
+                }
             }
-        }
 
-        var result = schema.execute();
+            var result = schema.execute();
 
-        if (getResult) {
-            return result.getResult();
-        } else {
-            return result;
+            if (getResult) {
+                return result.getResult();
+            } else {
+                return result;
+            }
+        } catch (any error) {
+            writeDumpToFile(error);
         }
     }
 
