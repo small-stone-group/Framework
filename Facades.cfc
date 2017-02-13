@@ -591,7 +591,7 @@ component
             paths = [name];
         }
 
-        var path = getBaseDir("Content/#arrayToList(paths, '/')#.html");
+        var path = getDataDir("#stripSlashes(env('site.content.relative_path'))#/#arrayToList(paths, '/')#.html");
 
         if (!fileExists(path)) {
             throw("Content file '#arrayToList(paths, ""/"")#' does not exist.");

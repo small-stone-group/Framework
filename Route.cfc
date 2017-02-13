@@ -119,7 +119,10 @@ component
      */
     public any function middleware(required string name)
     {
-        this.currentMiddleware = name;
+        if (len(name)) {
+            this.currentMiddleware = name;
+        }
+
         return this;
     }
 
