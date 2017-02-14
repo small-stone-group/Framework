@@ -594,8 +594,7 @@ component
         var path = getDataDir("#stripSlashes(env('site.content.relative_path'))#/#arrayToList(paths, '/')#.html");
 
         if (!fileExists(path)) {
-            throw("Content file '#arrayToList(paths, ""/"")#' does not exist.");
-            return '';
+            fileWrite(path, '');
         }
 
         var content = fileRead(path);
