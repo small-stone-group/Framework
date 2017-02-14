@@ -3,6 +3,7 @@ component
     this.datasource = getDatasource();
     this.queries = [];
     this.params = [];
+    this.hasOrderBy = false;
 
     public queryBuilder function init(string datasource = "")
     {
@@ -99,7 +100,9 @@ component
 
     public queryBuilder function orderBy(required string col, string dir = "asc")
     {
-        return this.add("order").add("by", "#col# #dir#");
+        this.add(cond(!this.hasOrderBy, "order")).add(cond(!this.hasOrderBy, "by"), "#cond(this.hasOrderBy, ',')# #col# #dir#");
+        this.hasOrderBy = true;
+        return this;
     }
 
     public queryBuilder function limit(required string data)

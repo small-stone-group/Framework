@@ -611,4 +611,26 @@ component
     {
         return (condition) ? passes : fails;
     }
+
+    /**
+     * Checks whether the given middleware passes with the current session.
+     *
+     * @return boolean
+     */
+    public boolean function middlewarePasses(required string name)
+    {
+        var path = getBaseDir('/App/Middleware/#name#.cfc');
+
+        if (fileExists(path)) {
+            var passes = createObject('component', 'App.Middleware.#name#').init();
+
+            if (!isValid('boolean', passes)) {
+                throw("Middleware '#name#' does not return a boolean value");
+            }
+
+            return passes;
+        } else {
+            throw("Middleware file '#path#' does not exist");
+        }
+    }
 }
