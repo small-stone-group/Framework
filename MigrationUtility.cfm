@@ -1,4 +1,8 @@
 <cfscript>
+    if (!middlewarePasses('developer')) {
+        abort;
+    }
+
     if (structKeyExists(url, 'method')) {
         try {
             switch (lCase(url.method)) {

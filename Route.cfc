@@ -54,10 +54,46 @@ component
         if (!isValid('array', r)) {
             r.checkMiddleware().perform(r.params, r.paramOrders);
         } else {
-            include requestedPage;
+            var virtual = existsVirtually(url.url_payload);
+
+            if (len(virtual)) {
+                redirect().to(virtual);
+            } else {
+                view('layouts.error|errors.404', {
+                    'title' = 'Page not found',
+                    'message' = "Route directive for page '#url.url_payload#' using method #cgi.request_method# does not exist."
+                });
+            }
         }
 
         return this;
+    }
+
+    /**
+     * Checks if the given path exists in a virtual directory.
+     * Returns the full URL if found, empty string if not.
+     *
+     * @return string
+     */
+    public string function existsVirtually(required string path)
+    {
+        var hasExtension = listFirst(listLast(path, '/'), '.') != listLast(listLast(path, '/'), '.');
+        
+        for (d in env('site.virtual_paths')) {
+            var p = getDataDir('/#stripSlashes(d)#/#stripSlashes(path)#');
+
+            if (hasExtension) {
+                if (fileExists(p)) {
+                    return getUrl('/data/#stripSlashes(d)#/#stripSlashes(path)#');
+                }
+            } else {
+                if (directoryExists(p)) {
+                    return getUrl('/data/#stripSlashes(d)#/#stripSlashes(path)#');
+                }
+            }
+        }
+
+        return '';
     }
 
     /**
@@ -225,14 +261,7 @@ component
             searchPath != '' &&
             !arrayContains(this.ignore, uri) &&
             !arrayContains(this.ignoreExtensions, listLast(uri, '.'))
-        ) {
-            view('layouts.error|errors.404', {
-                'title' = 'Page not found',
-                'message' = "Route directive for page '#uri#' using method #cgi.request_method# does not exist."
-            });
-
-            abort;
-        }
+        ) {}
 
         return routeURI;
     }
