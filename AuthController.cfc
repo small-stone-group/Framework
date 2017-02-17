@@ -57,7 +57,7 @@ component extends = "Controller"
     {
         var table = schema(this.model().getTable());
         table.integer('remember_token').nullable();
-        table.foreign('remember_token').references('remember_tokens', 'id').canDelete('set null');
+        table.foreign('remember_token').references('remember_tokens', 'id').onDelete('set null');
         table.update();
     }
 
@@ -76,9 +76,8 @@ component extends = "Controller"
      *
      * @return any
      */
-    public any function activate(struct params = {})
+    public any function activate(required string token)
     {
-        var token = params.token;
         var authModel = new App.Controllers.AuthController().model();
         var user = authModel
             .where('activation_token', token)

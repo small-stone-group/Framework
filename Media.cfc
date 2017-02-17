@@ -7,8 +7,13 @@ component
      */
     public any function init(string file = '')
     {
-        if (file != '' && fileExists(getDataDir(file))) {
-            this.file = getDataDir(file);
+        if (file != '') {
+            if (fileExists(getDataDir(file))) {
+                this.file = getDataDir(file);
+            } else {
+                throw('File #getDataDir(file)# does not exist.');
+                return;
+            }
         }
 
         return this;

@@ -91,6 +91,7 @@ component
             session.auth = userRecord;
             return true;
         } catch (any error) {
+            writeDumpToFile(error);
             return false;
         }
     }
