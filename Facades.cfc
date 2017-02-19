@@ -606,7 +606,7 @@ component
      *
      * @return string
      */
-    public string function cond(required bool condition, required string passes, string fails = '')
+    public string function cond(required boolean condition, required string passes, string fails = '')
     {
         return (condition) ? passes : fails;
     }
