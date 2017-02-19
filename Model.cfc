@@ -173,7 +173,7 @@ component
     public string function hashString(required string str, string salt = env('encryption.salt'))
     {
         return variables.instance.queryBuilder
-            .select("(SELECT SHA2(CONCAT('#str#', '#salt#'), 256)) AS hash")
+            .select("(SELECT SHA1(CONCAT('#str#', '#salt#'))) AS hash")
             .run().hash;
     }
 
@@ -297,7 +297,7 @@ component
                 loc.isFreshBinary = uCase(loc.fieldSQLType) == "CF_SQL_VARBINARY" && isValid("string", loc.fieldValue);
 
                 if (loc.isFreshBinary) {
-                    loc.assignments &= "#loc.field# = SHA2(CONCAT(:#loc.field#, :#loc.field#_saltkey), 256)";
+                    loc.assignments &= "#loc.field# = SHA1(CONCAT(:#loc.field#, :#loc.field#_saltkey))";
                     variables.instance.queryBuilder.addParams([{
                         "name" = '#loc.field#_saltkey',
                         "value" = env('encryption.salt'),
@@ -361,7 +361,7 @@ component
                 loc.isFreshBinary = loc.fieldSQLType == "CF_SQL_VARBINARY" && isValid("string", loc.fieldValue);
 
                 if (loc.isFreshBinary) {
-                    loc.values &= "SHA2(CONCAT(:#lCase(loc.field)#, :#loc.field#_saltkey), 256)";
+                    loc.values &= "SHA1(CONCAT(:#lCase(loc.field)#, :#loc.field#_saltkey))";
                     variables.instance.queryBuilder.addParams([{
                         "name" = '#loc.field#_saltkey',
                         "value" = env('encryption.salt'),
