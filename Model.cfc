@@ -172,9 +172,9 @@ component
      */
     public string function hashString(required string str, string salt = env('encryption.salt'))
     {
-        return variables.instance.queryBuilder
+        return toString(variables.instance.queryBuilder
             .select("(SELECT SHA1(CONCAT('#str#', '#salt#'))) AS hash")
-            .run().hash;
+            .run().hash);
     }
 
 	/**

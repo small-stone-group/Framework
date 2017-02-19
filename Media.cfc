@@ -33,10 +33,10 @@ component
 
         var file = fileUpload(
             getDataDir(path, true),
-            field,
+            field/*,
             accept,
             'makeUnique',
-            false
+            false*/
         );
 
         this.file = '#file.serverDirectory#/#file.serverFile#';

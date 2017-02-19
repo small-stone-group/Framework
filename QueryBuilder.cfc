@@ -11,6 +11,8 @@ component
         if (len(datasource)) {
             this.datasource = datasource;
         }
+		
+		variables.instance.hasOrderBy = false;
 
         return this;
     }
@@ -101,7 +103,10 @@ component
 
     public queryBuilder function orderBy(required string col, string dir = "asc")
     {
-        this.add(cond(!variables.instance.hasOrderBy, "order")).add(cond(!variables.instance.hasOrderBy, "by"), "#cond(variables.instance.hasOrderBy, ',')# #col# #dir#");
+		var str1 = (!variables.instance.hasOrderBy) ? "order" : "";
+		var str2 = (!variables.instance.hasOrderBy) ? "by" : "";
+		var str3 = (variables.instance.hasOrderBy) ? "," : "";
+        this.add(str1).add(str2, "#str3# #col# #dir#");
         variables.instance.hasOrderBy = true;
         return this;
     }
@@ -145,6 +150,7 @@ component
 
             // Clear queries ready for next
             this.queries = [];
+			variables.instance.hasOrderBy = false;
 
             schema.setDatasource(this.datasource);
             schema.setSQL(statement);
