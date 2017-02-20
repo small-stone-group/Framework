@@ -91,6 +91,16 @@ component
     }
 
     /**
+     * Converts an XML object to struct.
+     *
+     * @return any
+     */
+    public any function xmlToStruct(required string node)
+    {
+        return new App.Framework.Legacy().xmlToStruct(node, structNew());
+    }
+
+    /**
      * Gets a full URL with the given path.
      *
      * @return string

@@ -7,7 +7,6 @@ component
     variables.columns = [];
     variables.columnTypes = {};
     variables.instance.hasSelect = false;
-    variables.instance.queryBuilder = new App.Framework.QueryBuilder();
     variables.instance.takingSingular = false;
     variables.instance.skipAuth = false;
 
@@ -18,12 +17,13 @@ component
      */
     public any function init(any constructorData = {})
     {
-        var modelData = new App.Framework.Legacy().constructModelObject(variables.table);
+        var modelData = new App.Framework.Legacy().constructModelObject(variables.table, variables.datasource);
 
         variables.columns = modelData.columns;
         variables.columnTypes = modelData.columnTypes;
         variables.nullColumns = modelData.nullColumns;
         variables.instance.primaryKeyField = modelData.primaryKeyField;
+        variables.instance.queryBuilder = new App.Framework.QueryBuilder(variables.datasource);
 
         this.fill(modelData.data, false);
 
