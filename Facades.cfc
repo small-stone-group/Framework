@@ -107,8 +107,13 @@ component
      */
     public string function getUrl(string uri = '')
     {
-        var https = (cgi.https == 'off') ? 'http' : 'https';
-        return replace('#https#://#cgi.server_name#/#stripSlashes(uri)#', '\', '/', 'all');
+        var protocol = (cgi.https == 'off') ? 'http' : 'https';
+
+        if (len(uri)) {
+            return '#protocol#://#cgi.server_name#/#uri#/';
+        } else {
+            return '#protocol#://#cgi.server_name#/';
+        }
     }
 
     /**
