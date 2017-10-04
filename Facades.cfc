@@ -378,7 +378,7 @@ component
         if (isValid("struct", to)) {
             to = now();
         }
-     
+
         var diff = dateDiff("s", from, to);
         var since = 'Just now';
         var sMinute = 60;
@@ -387,7 +387,7 @@ component
         var sWeek = 7 * sDay;
         var sMonth = 4 * sWeek;
         var sYear = 12 * sMonth;
-     
+
         if (diff < sHour) {
             mins = round(diff / sMinute);
             if (mins <= 1) mins = 1;
@@ -442,7 +442,7 @@ component
         if (!structKeyExists(request, 'viewContent')) {
             return '';
         }
-        
+
         return request.viewContent;
     }
 
@@ -646,5 +646,56 @@ component
         } else {
             throw("Middleware file '#path#' does not exist");
         }
+    }
+
+    /**
+     * Converts the given structs keys to lowercase.
+     *
+     * @return struct
+     */
+    public struct function keysToLowerCase(required struct data)
+    {
+        var result = {};
+
+        for (k in structKeyList(data)) {
+            if (isStruct(data[k])) {
+                result[lCase(k)] = keysToLowerCase(data[k]);
+            } else {
+                result[lCase(k)] = data[k];
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Encode the given data as JSON with lowercase keys.
+     *
+     * @return string
+     */
+    public string function jsonEncode(required struct data)
+    {
+        var result = {};
+
+        for (k in structKeyList(data)) {
+            if (isStruct(data[k])) {
+                result[lCase(k)] = keysToLowerCase(data[k]);
+            } else {
+                result[lCase(k)] = data[k];
+            }
+        }
+
+        return serializeJSON(result);
+    }
+
+    /**
+     * Decodes the given JSON string.
+     * Just an alias for deserializeJson.
+     *
+     * @return any
+     */
+    public any function jsonDecode(required string json)
+    {
+        return deserializeJson(json);
     }
 }
