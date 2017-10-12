@@ -698,4 +698,14 @@ component
     {
         return deserializeJson(json);
     }
+
+    /**
+     * Serializes the given data as JSON and outputs it.
+     *
+     * @return void
+     */
+    public void function outputJson(required struct data)
+    {
+        writeOutput(jsonEncode(data));
+    }
 }
