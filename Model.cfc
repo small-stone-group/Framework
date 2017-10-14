@@ -306,7 +306,7 @@ component
                 } else {
                     loc.assignments &= "#loc.field# = :#loc.field#";
                 }
-                
+
                 if (loc.counter < arrayLen(loc.columns)) {
                     loc.assignments &= ", ";
                 }
@@ -370,7 +370,7 @@ component
                 } else {
                     loc.values &= ":#lCase(loc.field)#";
                 }
-                
+
                 if (loc.counter < arrayLen(loc.columns)) {
                     loc.values &= ", ";
                 }
@@ -392,7 +392,7 @@ component
                 .insertInto(variables.table, loc.inserts)
                 .values(loc.values)
                 .run(false);
-            
+
             this[variables.instance.primaryKeyField] = loc.createResult.getPrefix().generatedKey;
             this.onCreated();
         }
@@ -659,7 +659,7 @@ component
 
             arrayAppend(loc.result, loc.qModel);
         }
-        
+
         return loc.result;
     }
 
@@ -946,7 +946,7 @@ component
     public any function get()
     {
         var getResult = variables.instance.queryBuilder.run();
-        
+
         variables.instance.hasSelect = false;
 
         if (getResult.recordcount > 1) {
@@ -972,6 +972,19 @@ component
         var getResult = variables.instance.queryBuilder.run();
         variables.instance.hasSelect = false;
         return this.queryToModels(getResult, variables.model);
+    }
+
+    /**
+     * Executes the query string and returns the models in an array.
+     * The is a literal array, no methods, only columns.
+     *
+     * @return array
+     */
+    public any function toArray()
+    {
+        var getResult = variables.instance.queryBuilder.run();
+        variables.instance.hasSelect = false;
+        return queryToArrayOfStructs(getResult);
     }
 
     /**
