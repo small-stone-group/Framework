@@ -38,7 +38,7 @@ component
     {
         if (structKeyExists(url, "controller") && structKeyExists(url, "method")) {
             var component = createObject("component", "App.Controllers.#url.controller#");
-            var method = component.getMethod(url.method);
+            var method = component.getMethod(stripSlashes(url.method));
             method(form);
             return this;
         }
@@ -78,7 +78,7 @@ component
     public string function existsVirtually(required string path)
     {
         var hasExtension = listFirst(listLast(path, '/'), '.') != listLast(listLast(path, '/'), '.');
-        
+
         for (d in env('site.virtual_paths')) {
             var p = getDataDir('/#stripSlashes(d)#/#stripSlashes(path)#');
 
@@ -132,7 +132,7 @@ component
         this.get('#page#/create', '#controller#@create');
         this.get('#page#/{id}', '#controller#@show');
         this.get('#page#/{id}/edit', '#controller#@edit');
-        
+
         this.post(page, '#controller#@store');
         this.post('#page#/{id}', '#controller#@update');
         this.post('#page#/{id}/delete', '#controller#@delete');
