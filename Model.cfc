@@ -1030,7 +1030,7 @@ component
      *
      * @return array
      */
-    private array function getColumns()
+    public array function getColumns()
     {
         var columns = variables.columns;
 
@@ -1066,6 +1066,22 @@ component
     private string function parseType(required string value)
     {
         return reReplace(arguments.value, "\([\d\D]*\)", "", "all");
+    }
+
+    /**
+     * Flattens the given model into just a simple structure.
+     *
+     * @return struct
+     */
+    public struct function flatten()
+    {
+        var result = {};
+
+        for (column in this.getColumns()) {
+            result[column] = this[column];
+        }
+
+        return result;
     }
 
     /**
