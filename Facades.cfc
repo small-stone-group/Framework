@@ -110,7 +110,10 @@ component
         var protocol = (cgi.https == 'off') ? 'http' : 'https';
 
         if (len(uri)) {
-            return '#protocol#://#cgi.server_name#/#uri#/';
+            var extension = listLast(uri, '.');
+            var end = len(extension) ? '' : '/';
+
+            return '#protocol#://#cgi.server_name#/#uri##end#';
         } else {
             return '#protocol#://#cgi.server_name#/';
         }
