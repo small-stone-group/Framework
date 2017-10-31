@@ -52,7 +52,7 @@ component
         var r = route().findURI(payloadURI);
 
         if (!isValid('array', r)) {
-            r.checkMiddleware().perform(r.params, r.paramOrders);
+            r.checkMiddleware().perform(this.parseParams(r.params), this.parseOrders(r.paramOrders));
         } else {
             var virtual = existsVirtually(url.url_payload);
 
@@ -67,6 +67,52 @@ component
         }
 
         return this;
+    }
+
+    /**
+     * Parses the order keys.
+     *
+     * @return array
+     */
+    public array function parseOrders(required array orders)
+    {
+        var result = [];
+
+        for (order in orders) {
+            if (startsWith(order, '$')) {
+                arrayAppend(result, right(order, len(order) - 1));
+            } else {
+                arrayAppend(result, order);
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Parses the params for model variables.
+     *
+     * @return struct
+     */
+    public struct function parseParams(required struct params)
+    {
+        var result = {};
+
+        for (key in params) {
+            if (startsWith(key, '$')) {
+                var component = right(key, len(key) - 1);
+                var path = getBaseDir('/App/#component#.cfc');
+
+                if (fileExists(path)) {
+                    var model = createObject('component', 'App.#component#').init().find(params[key]);
+                    result[component] = model;
+                }
+            } else {
+                result[key] = params[key];
+            }
+        }
+
+        return result;
     }
 
     /**
