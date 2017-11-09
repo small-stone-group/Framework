@@ -48,6 +48,11 @@ component
             return this;
         }
 
+        if (!structKeyExists(url, 'url_payload')) {
+            include requestedPage;
+            return this;
+        }
+
         var payloadURI = (structKeyExists(url, 'url_payload')) ? url.url_payload : '/';
         var r = route().findURI(payloadURI);
 
