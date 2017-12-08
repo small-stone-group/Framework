@@ -151,7 +151,9 @@ component
     public string function getBaseDir(string path = '', boolean create = false)
     {
         var baseDir = stripTrailingSlashes(
-            structFindDefault(application, 'mvc', getCurrentPath()).baseDirectory
+            structFindDefault(application, 'mvc',
+                { 'baseDirectory' = getCurrentPath() }
+            ).baseDirectory
         );
 
         var targetDir = '#baseDir#\#stripSlashes(replace(path, '/', '\', 'all'))#';
