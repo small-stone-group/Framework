@@ -1075,7 +1075,7 @@ component
      */
     public any function flatten(array collection = [], array ignore = [])
     {
-        if (structIsEmpty(arguments)) {
+        if (arrayIsEmpty(arguments.collection)) {
             var result = {};
 
             for (column in variables.columns) {
