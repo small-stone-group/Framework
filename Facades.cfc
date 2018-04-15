@@ -657,6 +657,16 @@ component
     }
 
     /**
+     * Gets the JSON form data from the request.
+     *
+     * @return struct
+     */
+    public any function jsonForm()
+    {
+        return jsonDecode(toString(getHttpRequestData().content));
+    }
+
+    /**
      * Converts the given structs keys to lowercase.
      *
      * @return struct
@@ -712,6 +722,10 @@ component
      */
     public void function outputJson(required struct data)
     {
+        getPageContext()
+            .getResponse()
+            .setContentType('application/json');
+
         writeOutput(jsonEncode(data));
     }
 }
