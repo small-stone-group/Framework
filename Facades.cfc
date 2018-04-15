@@ -660,9 +660,17 @@ component
     {
         var result = {};
 
-        for (k in structKeyList(data)) {
+        for (var k in structKeyList(data)) {
             if (isStruct(data[k])) {
                 result[lCase(k)] = keysToLowerCase(data[k]);
+            } else if (isArray(data[k])) {
+                var newArray = [];
+
+                for (var i in data[k]) {
+                    arrayAppend(newArray, keysToLowerCase(i));
+                }
+
+                result[lCase(k)] = newArray;
             } else {
                 result[lCase(k)] = data[k];
             }
@@ -678,17 +686,7 @@ component
      */
     public string function jsonEncode(required struct data)
     {
-        var result = {};
-
-        for (k in structKeyList(data)) {
-            if (isStruct(data[k])) {
-                result[lCase(k)] = keysToLowerCase(data[k]);
-            } else {
-                result[lCase(k)] = data[k];
-            }
-        }
-
-        return serializeJSON(result);
+        return serializeJSON(keysToLowerCase(data));
     }
 
     /**
