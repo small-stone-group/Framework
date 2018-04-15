@@ -150,7 +150,12 @@ component
      */
     public string function getBaseDir(string path = '', boolean create = false)
     {
-        var baseDir = stripTrailingSlashes(application.mvc.baseDirectory);
+        var baseDir = stripTrailingSlashes(
+            structFindDefault(application, 'mvc',
+                { 'baseDirectory' = getCurrentPath() }
+            ).baseDirectory
+        );
+
         var targetDir = '#baseDir#\#stripSlashes(replace(path, '/', '\', 'all'))#';
 
         if (create && !directoryExists(targetDir)) {

@@ -81,6 +81,8 @@ component
      */
     public any function onError(any exception)
     {
+        writeDump(exception);
+
         writeDumpToFile(exception);
     }
 }

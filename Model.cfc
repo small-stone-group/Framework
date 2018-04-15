@@ -1073,15 +1073,33 @@ component
      *
      * @return struct
      */
-    public struct function flatten()
+    public any function flatten(array collection = [], array ignore = [])
     {
-        var result = {};
+        if (arrayIsEmpty(arguments.collection)) {
+            var result = {};
 
-        for (column in this.getColumns()) {
-            result[column] = this[column];
+            for (column in variables.columns) {
+                result[column] = this[column];
+            }
+
+            return result;
+        } else {
+            var result = [];
+
+            for (item in arguments.collection) {
+                var row = {};
+
+                for (column in variables.columns) {
+                    if (!arrayContains(ignore, column)) {
+                        row[column] = item[column];
+                    }
+                }
+
+                arrayAppend(result, row);
+            }
+
+            return result;
         }
-
-        return result;
     }
 
     /**
